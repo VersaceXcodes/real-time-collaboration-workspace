@@ -6,7 +6,7 @@ import { CreateWorkspaceInput } from '@schema'; // Assuming @schema is path to t
 
 const UV_WorkspaceCreation: React.FC = () => {
   const [workspaceName, setWorkspaceName] = useState('');
-  const [settings, setSettings] = useState<object>({});
+  const [settings, setSettings] = useState<{ [k: string]: unknown }>({});
   const [invitees, setInvitees] = useState<{ email: string; role: string }[]>([]);
   const [email, setEmail] = useState('');
   const [role, setRole] = useState('');
@@ -24,7 +24,7 @@ const UV_WorkspaceCreation: React.FC = () => {
   const createWorkspace = useMutation({
     mutationFn: async (): Promise<void> => {
       const newWorkspace: CreateWorkspaceInput = {
-        owner_user_id: currentUser!.id, // Current user ID
+        owner_user_id: currentUser!.user_id, // Current user ID
         name: workspaceName,
         settings,
       };
@@ -120,10 +120,10 @@ const UV_WorkspaceCreation: React.FC = () => {
             <div>
               <button
                 type="submit"
-                disabled={createWorkspace.isLoading}
+                disabled={createWorkspace.isPending}
                 className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {createWorkspace.isLoading ? 'Creating...' : 'Create Workspace'}
+                {createWorkspace.isPending ? 'Creating...' : 'Create Workspace'}
               </button>
             </div>
           </form>

@@ -18,22 +18,20 @@ const UV_ChannelView: React.FC = () => {
   const [newMessage, setNewMessage] = useState('');
 
   // Fetch Messages
-  const { data: messages, refetch } = useQuery<Message[], Error>(
-    ['channelMessages', channel_id],
-    async () => {
-      const response = await axios.get<Message[]>(`$\{import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/channels/${channel_id}/messages`, {
+  const { data: messages, refetch } = useQuery({
+    queryKey: ['channelMessages', channel_id],
+    queryFn: async () => {
+      const response = await axios.get<Message[]>(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/channels/${channel_id}/messages`, {
         headers: { Authorization: `Bearer ${auth_token}` },
       });
       return response.data;
     },
-    {
-      enabled: Boolean(channel_id && auth_token),
-    }
-  );
+    enabled: Boolean(channel_id && auth_token),
+  });
 
   // Send Message Mutation
-  const sendMessage = useMutation(
-    async (messageContent: string) => {
+  const sendMessage = useMutation({
+    mutationFn: async (messageContent: string) => {
       return axios.post(
         `${
           import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'
@@ -42,22 +40,20 @@ const UV_ChannelView: React.FC = () => {
         { headers: { Authorization: `Bearer ${auth_token}` } }
       );
     },
-    {
-      onSuccess: () => {
-        setNewMessage('');
-        refetch();
-        if (socket && channel_id) {
-          socket.emit('channelMessageCreated', {
-            channel_id,
-            content: newMessage, // Ensure consistency with submitted message
-          });
-        }
-      },
-      onError: (error) => {
-        console.error('Error sending message:', error);
-      },
-    }
-  );
+    onSuccess: () => {
+      setNewMessage('');
+      refetch();
+      if (socket && channel_id) {
+        socket.emit('channelMessageCreated', {
+          channel_id,
+          content: newMessage, // Ensure consistency with submitted message
+        });
+      }
+    },
+    onError: (error) => {
+      console.error('Error sending message:', error);
+    },
+  });
 
   // Socket Message Handling
   useEffect(() => {
@@ -119,7 +115,7 @@ const UV_ChannelView: React.FC = () => {
           <button
             type="submit"
             className="bg-blue-600 text-white px-4 py-2 rounded"
-            disabled={sendMessage.isLoading || !newMessage}
+            disabled={sendMessage.isPending || !newMessage}
           >
             Send
           </button>

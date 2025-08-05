@@ -17,10 +17,10 @@ const UV_KanbanBoard: React.FC = () => {
   const queryClient = useQueryClient();
 
   // Fetch tasks for the board
-  const { data: tasks, isLoading, isError } = useQuery<Task[], Error>(
-    ['kanbanBoardTasks', board_id], 
-    async () => {
-      const { data } = await axios.get(`\${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/kanban_boards/${board_id}/tasks`, {
+  const { data: tasks, isLoading, isError } = useQuery({
+    queryKey: ['kanbanBoardTasks', board_id],
+    queryFn: async () => {
+      const { data } = await axios.get(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/kanban_boards/${board_id}/tasks`, {
         headers: {
           Authorization: `Bearer ${authToken}`,
         },
@@ -28,14 +28,12 @@ const UV_KanbanBoard: React.FC = () => {
       // Assuming data is of type Task[] and needs to be organized by column
       return data;
     },
-    {
-      enabled: !!authToken && !!board_id, // Only fetches if authToken and board_id are available
-    }
-  );
+    enabled: !!authToken && !!board_id, // Only fetches if authToken and board_id are available
+  });
 
-  const updateTaskStatus = useMutation(
-    async ({ taskId, newStatus }: { taskId: string; newStatus: string }) => {
-      await axios.patch(`\${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/tasks/${taskId}`, 
+  const updateTaskStatus = useMutation({
+    mutationFn: async ({ taskId, newStatus }: { taskId: string; newStatus: string }) => {
+      await axios.patch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/tasks/${taskId}`, 
         { status: newStatus }, 
         {
           headers: {
@@ -44,16 +42,14 @@ const UV_KanbanBoard: React.FC = () => {
         }
       );
     },
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries(['kanbanBoardTasks', board_id]);
-      },
-    }
-  );
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['kanbanBoardTasks', board_id] });
+    },
+  });
 
   useEffect(() => {
-    if (tasks) {
-      const organizedColumns = tasks.reduce((acc, task) => {
+    if (tasks && Array.isArray(tasks)) {
+      const organizedColumns = (tasks as Task[]).reduce((acc, task) => {
         if (!acc[task.status]) {
           acc[task.status] = [];
         }

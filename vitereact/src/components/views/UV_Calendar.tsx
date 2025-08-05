@@ -51,18 +51,16 @@ const UV_Calendar: React.FC = () => {
     description: null,
   });
 
-  const { data: events = [], isLoading, error } = useQuery<CalendarEvent[], Error>(
-    ['calendarEvents', authToken],
-    () => fetchEvents(authToken!),
-    { enabled: !!authToken }
-  );
+  const { data: events = [], isLoading, error } = useQuery({
+    queryKey: ['calendarEvents', authToken],
+    queryFn: () => fetchEvents(authToken!),
+    enabled: !!authToken
+  });
 
-  const mutation = useMutation(
-    (newEvent: Omit<CalendarEvent, 'event_id'>) => createEvent(newEvent, authToken!),
-    {
-      onSuccess: () => queryClient.invalidateQueries(['calendarEvents', authToken]),
-    }
-  );
+  const mutation = useMutation({
+    mutationFn: (newEvent: Omit<CalendarEvent, 'event_id'>) => createEvent(newEvent, authToken!),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['calendarEvents', authToken] }),
+  });
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -138,9 +136,9 @@ const UV_Calendar: React.FC = () => {
           <button
             type="submit"
             className="mt-4 bg-blue-600 text-white py-2 px-4 rounded"
-            disabled={mutation.isLoading}
+            disabled={mutation.isPending}
           >
-            {mutation.isLoading ? 'Saving...' : 'Add Event'}
+            {mutation.isPending ? 'Saving...' : 'Add Event'}
           </button>
         </form>
 

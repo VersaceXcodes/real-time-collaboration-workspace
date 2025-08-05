@@ -34,24 +34,28 @@ const UV_DocumentEditor: React.FC = () => {
   const [documentContent, setDocumentContent] = useState<string>('');
   const authToken = useAppStore(state => state.authentication_state.auth_token);
 
-  const { data: documentData, isLoading, error } = useQuery(['documentContent', document_id], () => fetchDocumentContent(document_id!, authToken!), {
+  const { data: documentData, isLoading, error } = useQuery({
+    queryKey: ['documentContent', document_id],
+    queryFn: () => fetchDocumentContent(document_id!, authToken!),
     enabled: !!document_id && !!authToken,
   });
 
-  const mutation = useMutation((content: string) => saveDocumentContent({ documentId: document_id!, content }, authToken!));
+  const mutation = useMutation({
+    mutationFn: (content: string) => saveDocumentContent({ documentId: document_id!, content }, authToken!)
+  });
 
   const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setDocumentContent(e.target.value);
   };
 
   const handleSave = () => {
-    if (documentContent !== documentData?.content) {
+    if (documentData && documentContent !== documentData.content) {
       mutation.mutate(documentContent);
     }
   };
 
   useEffect(() => {
-    if (documentData) {
+    if (documentData && documentData.content) {
       setDocumentContent(documentData.content);
     }
   }, [documentData]);
@@ -82,9 +86,9 @@ const UV_DocumentEditor: React.FC = () => {
         <button
           className="mt-4 p-2 bg-blue-600 text-white rounded hover:bg-blue-700 focus:outline-none"
           onClick={handleSave}
-          disabled={mutation.isLoading}
+          disabled={mutation.isPending}
         >
-          {mutation.isLoading ? 'Saving...' : 'Save'}
+          {mutation.isPending ? 'Saving...' : 'Save'}
         </button>
       </div>
     </>

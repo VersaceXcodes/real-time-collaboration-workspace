@@ -2,7 +2,6 @@ import React from 'react';
 import axios from 'axios';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAppStore } from '@/store/main';
-import { Notification } from '@schema';
 import { notificationSchema } from '@schema';
 
 const GV_NotificationPanel: React.FC = () => {
@@ -10,9 +9,9 @@ const GV_NotificationPanel: React.FC = () => {
   const queryClient = useQueryClient();
 
   // Fetch notifications
-  const { data: notifications, isLoading, isError, error } = useQuery<Notification[], Error>(
-    ['notifications'],
-    async () => {
+  const { data: notifications, isLoading, isError, error } = useQuery({
+    queryKey: ['notifications'],
+    queryFn: async () => {
       const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/notifications`, {
         headers: {
           Authorization: `Bearer ${authToken}`
@@ -20,23 +19,21 @@ const GV_NotificationPanel: React.FC = () => {
       });
       return notificationSchema.array().parse(response.data);
     }
-  );
+  });
 
   // Mutation to mark a notification as read
-  const { mutate: markAsRead } = useMutation(
-    (notification_id: string) => {
+  const { mutate: markAsRead } = useMutation({
+    mutationFn: (notification_id: string) => {
       return axios.patch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/notifications/${notification_id}/read`, {}, {
         headers: {
           Authorization: `Bearer ${authToken}`
         }
       });
     },
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries(['notifications']);
-      }
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
     }
-  );
+  });
 
   return (
     <>

@@ -15,9 +15,9 @@ const GV_TopNav: React.FC = () => {
 
   // Local state
   const [search_query, setSearchQuery] = useState('');
-  const notification_count = useQuery<number, Error>(
-    ['notificationsCount'],
-    async () => {
+  const notification_count = useQuery({
+    queryKey: ['notificationsCount'],
+    queryFn: async () => {
       const response = await axios.get(
         `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/notifications/count`,
         {
@@ -28,11 +28,9 @@ const GV_TopNav: React.FC = () => {
       );
       return response.data.unread_count;
     },
-    {
-      enabled: !!auth_token, // Only fetch if token exists
-      refetchInterval: 60000 // Refetch every minute
-    }
-  );
+    enabled: !!auth_token, // Only fetch if token exists
+    refetchInterval: 60000 // Refetch every minute
+  });
 
   return (
     <>

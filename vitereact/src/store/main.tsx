@@ -6,20 +6,24 @@ import axios from 'axios';
 
 // Define Types
 interface User {
-  id: string;
+  user_id: string;
   email: string;
   name: string;
   created_at: string;
 }
 
 interface Workspace {
-  id: string;
+  workspace_id: string;
   name: string;
+  owner_user_id: string;
+  settings: { [k: string]: unknown } | null;
 }
 
 interface Channel {
-  id: string;
+  channel_id: string;
   name: string;
+  workspace_id: string;
+  is_private: boolean;
 }
 
 interface AuthenticationState {

@@ -34,34 +34,28 @@ const UV_DirectMessage: React.FC = () => {
     return data;
   }
 
-  const { data: messages, isLoading, error } = useQuery<Message[], Error>(
-    ['directMessages', user_id],
-    fetchMessages
-  );
+  const { data: messages, isLoading, error } = useQuery({
+    queryKey: ['directMessages', user_id],
+    queryFn: fetchMessages
+  });
 
-  const sendMessageMutation = useMutation<
-    unknown,
-    Error,
-    { user_id: string; content: string }
-  >(
-    (newMessageData) =>
+  const sendMessageMutation = useMutation({
+    mutationFn: (newMessageData: { user_id: string; content: string }) =>
       axios.post(
         `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/users/${newMessageData.user_id}/messages`,
         { content: newMessageData.content },
         { headers: { Authorization: `Bearer ${authToken}` } }
       ),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries(['directMessages', user_id]);
-        setNewMessage('');
-      },
-    }
-  );
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['directMessages', user_id] });
+      setNewMessage('');
+    },
+  });
 
   const handleSendMessage = (event: React.FormEvent) => {
     event.preventDefault();
     if (newMessage.trim() !== '') {
-      sendMessageMutation.mutate({ user_id, content: newMessage });
+      sendMessageMutation.mutate({ user_id: user_id!, content: newMessage });
     }
   };
 
@@ -101,7 +95,7 @@ const UV_DirectMessage: React.FC = () => {
           <button
             type="submit"
             className="bg-blue-500 text-white rounded p-2"
-            disabled={sendMessageMutation.isLoading}
+            disabled={sendMessageMutation.isPending}
           >
             Send
           </button>

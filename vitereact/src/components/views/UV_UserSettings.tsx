@@ -36,30 +36,28 @@ const UV_UserSettings: React.FC = () => {
   const [email, setEmail] = useState(currentUser?.email || '');
   const [feedback, setFeedback] = useState('');
 
-  const { isLoading } = useQuery(
-    ['userSettings', currentUser?.id],
-    () => fetchUserSettings(currentUser!.id, authToken!),
-    { enabled: !!currentUser }
-  );
+  const { isLoading } = useQuery({
+    queryKey: ['userSettings', currentUser?.user_id],
+    queryFn: () => fetchUserSettings(currentUser!.user_id, authToken!),
+    enabled: !!currentUser
+  });
 
-  const mutation = useMutation(
-    (settings) => updateUserSettings(currentUser!.id, authToken!, settings),
-    {
-      onSuccess: (data) => {
-        updateProfile(data);
-        setFeedback('Settings updated successfully');
-      },
-      onError: (error) => {
-        setFeedback(`Error: ${(error as Error).message}`);
-      }
+  const mutation = useMutation({
+    mutationFn: (settings: any) => updateUserSettings(currentUser!.user_id, authToken!, settings),
+    onSuccess: (data) => {
+      updateProfile(data);
+      setFeedback('Settings updated successfully');
+    },
+    onError: (error) => {
+      setFeedback(`Error: ${(error as Error).message}`);
     }
-  );
+  });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setFeedback('');
     try {
-      const validatedData = updateUserInputSchema.parse({ name, email });
+      const validatedData = updateUserInputSchema.parse({ user_id: currentUser!.user_id, name, email });
       mutation.mutate(validatedData);
     } catch (err: unknown) {
       if (err instanceof z.ZodError) {
@@ -124,9 +122,9 @@ const UV_UserSettings: React.FC = () => {
           <button
             type="submit"
             className="w-full py-2 mt-4 bg-blue-600 text-white Rounded shadow"
-            disabled={mutation.isLoading}
+            disabled={mutation.isPending}
           >
-            {mutation.isLoading ? 'Saving...' : 'Save Changes'}
+            {mutation.isPending ? 'Saving...' : 'Save Changes'}
           </button>
         </form>
       </div>

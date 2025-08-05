@@ -44,21 +44,21 @@ const UV_HomeDashboard: React.FC = () => {
     data: activities = [],
     isLoading: loadingActivities,
     isError: errorActivities,
-  } = useQuery(
-    ['recentActivities', selectedWorkspaceId],
-    () => fetchRecentActivities(selectedWorkspaceId!, authToken!),
-    { enabled: !!selectedWorkspaceId && !!authToken }
-  );
+  } = useQuery({
+    queryKey: ['recentActivities', selectedWorkspaceId],
+    queryFn: () => fetchRecentActivities(selectedWorkspaceId!, authToken!),
+    enabled: !!selectedWorkspaceId && !!authToken
+  });
 
   const {
     data: statistics = { total_channels: 0, total_members: 0 },
     isLoading: loadingStats,
     isError: errorStats,
-  } = useQuery(
-    ['workspaceStatistics', selectedWorkspaceId],
-    () => fetchWorkspaceStatistics(selectedWorkspaceId!, authToken!),
-    { enabled: !!selectedWorkspaceId && !!authToken }
-  );
+  } = useQuery({
+    queryKey: ['workspaceStatistics', selectedWorkspaceId],
+    queryFn: () => fetchWorkspaceStatistics(selectedWorkspaceId!, authToken!),
+    enabled: !!selectedWorkspaceId && !!authToken
+  });
 
   return (
     <>
@@ -84,7 +84,7 @@ const UV_HomeDashboard: React.FC = () => {
               <p className="text-red-600">Error loading activities.</p>
             ) : (
               <ul className="space-y-3">
-                {activities.map((activity, idx) => (
+                {(activities as Activity[]).map((activity, idx) => (
                   <li key={idx} className="border-b py-2">
                     <strong>{activity.activity_type}</strong>: {activity.content}
                   </li>
@@ -101,8 +101,8 @@ const UV_HomeDashboard: React.FC = () => {
               <p className="text-red-600">Error loading statistics.</p>
             ) : (
               <div>
-                <p>Total Channels: {statistics.total_channels}</p>
-                <p>Total Members: {statistics.total_members}</p>
+                <p>Total Channels: {(statistics as WorkspaceStatistics).total_channels}</p>
+                <p>Total Members: {(statistics as WorkspaceStatistics).total_members}</p>
               </div>
             )}
           </div>

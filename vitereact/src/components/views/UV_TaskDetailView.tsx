@@ -36,16 +36,19 @@ const UV_TaskDetailView: React.FC = () => {
     );
   };
 
-  const { data, error, isLoading } = useQuery(
-    ['taskDetails', task_id],
-    fetchTaskDetails,
-    { enabled: !!task_id }
-  );
+  const { data, error, isLoading } = useQuery({
+    queryKey: ['taskDetails', task_id],
+    queryFn: fetchTaskDetails,
+    enabled: !!task_id
+  });
 
-  const mutation = useMutation(updateTaskStatus, {
+  const mutation = useMutation({
+    mutationFn: updateTaskStatus,
     onSuccess: () => {
       // Refresh task details
-      setTaskDetails(current => ({ ...current, ...data }));
+      if (data) {
+        setTaskDetails(current => ({ ...current, ...data }));
+      }
     }
   });
 

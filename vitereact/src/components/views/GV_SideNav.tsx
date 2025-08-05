@@ -16,21 +16,19 @@ const GV_SideNav: React.FC = () => {
   const join_workspace = useAppStore(state => state.join_workspace);
 
   // Switch Workspace Mutation
-  const switchWorkspaceMutation = useMutation(
-    (workspace_id: string) => axios.patch(
+  const switchWorkspaceMutation = useMutation({
+    mutationFn: (workspace_id: string) => axios.patch(
       `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/workspaces/${workspace_id}/switch`,
       null,
       { headers: { Authorization: `Bearer ${auth_token}` } }
     ),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries(['channels']); // Invalidate channels query to refresh
-      },
-      onError: (error) => {
-        console.error('Error switching workspace:', error);
-      }
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['channels'] }); // Invalidate channels query to refresh
+    },
+    onError: (error) => {
+      console.error('Error switching workspace:', error);
     }
-  );
+  });
 
   const fetchChannels = () => {
     console.warn('MISSING ENDPOINT: Fetch channels per workspace');
@@ -51,14 +49,14 @@ const GV_SideNav: React.FC = () => {
           <h1 className="text-lg font-bold">Workspaces</h1>
           <ul className="mt-3 space-y-2">
             {workspaces.map((workspace: Workspace) => (
-              <li key={workspace.id}>
+              <li key={workspace.workspace_id}>
                 <button
                   className={`text-left w-full px-2 py-1 rounded ${
-                    selected_workspace_id === workspace.id ? 'bg-blue-600' : 'hover:bg-gray-700'
+                    selected_workspace_id === workspace.workspace_id ? 'bg-blue-600' : 'hover:bg-gray-700'
                   }`}
                   onClick={() => {
-                    join_workspace(workspace.id);
-                    switchWorkspaceMutation.mutate(workspace.id);
+                    join_workspace(workspace.workspace_id);
+                    switchWorkspaceMutation.mutate(workspace.workspace_id);
                   }}
                 >
                   {workspace.name}
@@ -70,9 +68,9 @@ const GV_SideNav: React.FC = () => {
           <h2 className="mt-6 text-lg font-semibold">Channels</h2>
           <ul className="mt-2 space-y-2">
             {channels.map((channel: Channel) => (
-              <li key={channel.id}>
+              <li key={channel.channel_id}>
                 <Link
-                  to={`/channel/${channel.id}`}
+                  to={`/channel/${channel.channel_id}`}
                   className="block px-2 py-1 rounded hover:bg-gray-700"
                 >
                   {channel.name}
