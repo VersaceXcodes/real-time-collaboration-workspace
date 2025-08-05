@@ -8,7 +8,7 @@ import * as jwt from 'jsonwebtoken';
 import { Server as WebSocketServer } from 'socket.io';
 import * as http from 'http';
 import { Pool } from 'pg';
-import { userSchema, createUserInputSchema, updateUserInputSchema, searchUserInputSchema, workspaceSchema, createWorkspaceInputSchema, updateWorkspaceInputSchema, searchWorkspaceInputSchema, workspaceMemberSchema, createWorkspaceMemberInputSchema, updateWorkspaceMemberInputSchema, searchWorkspaceMemberInputSchema, channelSchema, createChannelInputSchema, updateChannelInputSchema, searchChannelInputSchema, messageSchema, createMessageInputSchema, updateMessageInputSchema, searchMessageInputSchema, fileSchema, createFileInputSchema, updateFileInputSchema, searchFileInputSchema, kanbanBoardSchema, createKanbanBoardInputSchema, updateKanbanBoardInputSchema, searchKanbanBoardInputSchema, taskSchema, createTaskInputSchema, updateTaskInputSchema, searchTaskInputSchema, documentSchema, createDocumentInputSchema, updateDocumentInputSchema, searchDocumentInputSchema, calendarEventSchema, createCalendarEventInputSchema, updateCalendarEventInputSchema, searchCalendarEventInputSchema, notificationSchema, createNotificationInputSchema, updateNotificationInputSchema, searchNotificationInputSchema } from './schema.js';
+import { userSchema, createUserInputSchema, updateUserInputSchema, searchUserInputSchema, workspaceSchema, createWorkspaceInputSchema, updateWorkspaceInputSchema, searchWorkspaceInputSchema, workspaceMemberSchema, createWorkspaceMemberInputSchema, updateWorkspaceMemberInputSchema, searchWorkspaceMemberInputSchema, channelSchema, createChannelInputSchema, updateChannelInputSchema, searchChannelInputSchema, messageSchema, createMessageInputSchema, updateMessageInputSchema, searchMessageInputSchema, fileSchema, createFileInputSchema, updateFileInputSchema, searchFileInputSchema, kanbanBoardSchema, createKanbanBoardInputSchema, updateKanbanBoardInputSchema, searchKanbanBoardInputSchema, taskSchema, createTaskInputSchema, updateTaskInputSchema, searchTaskInputSchema, documentSchema, createDocumentInputSchema, updateDocumentInputSchema, searchDocumentInputSchema, calendarEventSchema, createCalendarEventInputSchema, updateCalendarEventInputSchema, searchCalendarEventInputSchema, notificationSchema, createNotificationInputSchema, updateNotificationInputSchema, searchNotificationInputSchema } from './schema';
 
 dotenv.config();
 
@@ -252,10 +252,12 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-export { app, pool };
+export { app, pool, server };
 
-// Start the server
-const port = Number(process.env.PORT) || 3000;
-server.listen(port, '0.0.0.0', () => {
-  console.log(`Server running on port ${port} and listening on 0.0.0.0`);
-});
+// Start the server only if this file is run directly (not imported)
+if (import.meta.url === `file://${process.argv[1]}`) {
+  const port = Number(process.env.PORT) || 3000;
+  server.listen(port, '0.0.0.0', () => {
+    console.log(`Server running on port ${port} and listening on 0.0.0.0`);
+  });
+}
