@@ -1,14 +1,14 @@
 import express from 'express';
 import cors from "cors";
-import dotenv from "dotenv";
-import fs from "fs";
-import path from 'path';
+import * as dotenv from "dotenv";
+import * as fs from "fs";
+import * as path from 'path';
 import { fileURLToPath } from 'url';
-import jwt from 'jsonwebtoken';
+import * as jwt from 'jsonwebtoken';
 import { Server as WebSocketServer } from 'socket.io';
-import http from 'http';
-import pkg from 'pg';
-import { userSchema, createUserInputSchema, updateUserInputSchema, searchUserInputSchema, workspaceSchema, createWorkspaceInputSchema, updateWorkspaceInputSchema, searchWorkspaceInputSchema, workspaceMemberSchema, createWorkspaceMemberInputSchema, updateWorkspaceMemberInputSchema, searchWorkspaceMemberInputSchema, channelSchema, createChannelInputSchema, updateChannelInputSchema, searchChannelInputSchema, messageSchema, createMessageInputSchema, updateMessageInputSchema, searchMessageInputSchema, fileSchema, createFileInputSchema, updateFileInputSchema, searchFileInputSchema, kanbanBoardSchema, createKanbanBoardInputSchema, updateKanbanBoardInputSchema, searchKanbanBoardInputSchema, taskSchema, createTaskInputSchema, updateTaskInputSchema, searchTaskInputSchema, documentSchema, createDocumentInputSchema, updateDocumentInputSchema, searchDocumentInputSchema, calendarEventSchema, createCalendarEventInputSchema, updateCalendarEventInputSchema, searchCalendarEventInputSchema, notificationSchema, createNotificationInputSchema, updateNotificationInputSchema, searchNotificationInputSchema } from './schema.ts';
+import * as http from 'http';
+import { Pool } from 'pg';
+import { userSchema, createUserInputSchema, updateUserInputSchema, searchUserInputSchema, workspaceSchema, createWorkspaceInputSchema, updateWorkspaceInputSchema, searchWorkspaceInputSchema, workspaceMemberSchema, createWorkspaceMemberInputSchema, updateWorkspaceMemberInputSchema, searchWorkspaceMemberInputSchema, channelSchema, createChannelInputSchema, updateChannelInputSchema, searchChannelInputSchema, messageSchema, createMessageInputSchema, updateMessageInputSchema, searchMessageInputSchema, fileSchema, createFileInputSchema, updateFileInputSchema, searchFileInputSchema, kanbanBoardSchema, createKanbanBoardInputSchema, updateKanbanBoardInputSchema, searchKanbanBoardInputSchema, taskSchema, createTaskInputSchema, updateTaskInputSchema, searchTaskInputSchema, documentSchema, createDocumentInputSchema, updateDocumentInputSchema, searchDocumentInputSchema, calendarEventSchema, createCalendarEventInputSchema, updateCalendarEventInputSchema, searchCalendarEventInputSchema, notificationSchema, createNotificationInputSchema, updateNotificationInputSchema, searchNotificationInputSchema } from './schema.js';
 
 dotenv.config();
 
@@ -18,7 +18,7 @@ const pool = new Pool(
   DATABASE_URL
     ? { 
         connectionString: DATABASE_URL, 
-        ssl: { require: true } 
+        ssl: { rejectUnauthorized: false } 
       }
     : {
         host: PGHOST,
@@ -26,7 +26,7 @@ const pool = new Pool(
         user: PGUSER,
         password: PGPASSWORD,
         port: Number(PGPORT),
-        ssl: { require: true },
+        ssl: { rejectUnauthorized: false },
       }
 );
 
@@ -58,7 +58,7 @@ const authenticateToken = async (req, res, next) => {
   }
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);
+    const decoded = jwt.verify(token, JWT_SECRET) as any;
     const result = await pool.query('SELECT id, email, name, created_at FROM users WHERE id = $1', [decoded.user_id]);
     
     if (result.rows.length === 0) {
@@ -255,7 +255,7 @@ app.get('*', (req, res) => {
 export { app, pool };
 
 // Start the server
-const port = process.env.PORT || 3000;
+const port = Number(process.env.PORT) || 3000;
 server.listen(port, '0.0.0.0', () => {
   console.log(`Server running on port ${port} and listening on 0.0.0.0`);
 });
