@@ -1,0 +1,19 @@
+{
+  "timestamp": 1754426633767,
+  "operation": {
+    "id": "webapp:react:root",
+    "refs": {
+      "id": "app",
+      "version": "1754426609928"
+    }
+  },
+  "projectId": "real-time-collaboration-workspace",
+  "files": [
+    {
+      "path": "../../apps/real-time-collaboration-workspace/vitereact/src/App.tsx",
+      "type": "text",
+      "size": 3976,
+      "dependencies": false
+    }
+  ]
+}

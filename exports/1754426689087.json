@@ -1,0 +1,19 @@
+{
+  "timestamp": 1754426689087,
+  "operation": {
+    "id": "webapp:react:views",
+    "refs": {
+      "id": "UV_UserSettings",
+      "version": "1754426634310"
+    }
+  },
+  "projectId": "real-time-collaboration-workspace",
+  "files": [
+    {
+      "path": "../../apps/real-time-collaboration-workspace/vitereact/src/components/views/UV_UserSettings.tsx",
+      "type": "text",
+      "size": 4594,
+      "dependencies": false
+    }
+  ]
+}

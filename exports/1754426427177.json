@@ -1,0 +1,15 @@
+{
+  "timestamp": 1754426427177,
+  "operation": {
+    "id": "backend:specifications:openapi"
+  },
+  "projectId": "real-time-collaboration-workspace",
+  "files": [
+    {
+      "path": "../../apps/real-time-collaboration-workspace/backend/openapi.yaml",
+      "type": "text",
+      "size": 9086,
+      "dependencies": false
+    }
+  ]
+}

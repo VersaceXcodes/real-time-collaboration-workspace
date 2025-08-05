@@ -1,0 +1,19 @@
+{
+  "timestamp": 1754426663771,
+  "operation": {
+    "id": "webapp:react:views",
+    "refs": {
+      "id": "GV_TopNav",
+      "version": "1754426634313"
+    }
+  },
+  "projectId": "real-time-collaboration-workspace",
+  "files": [
+    {
+      "path": "../../apps/real-time-collaboration-workspace/vitereact/src/components/views/GV_TopNav.tsx",
+      "type": "text",
+      "size": 3537,
+      "dependencies": false
+    }
+  ]
+}

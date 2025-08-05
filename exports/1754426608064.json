@@ -1,0 +1,21 @@
+{
+  "timestamp": 1754426608064,
+  "operation": {
+    "id": "backend:tests:main"
+  },
+  "projectId": "real-time-collaboration-workspace",
+  "files": [
+    {
+      "path": "../../apps/real-time-collaboration-workspace/backend/server.test.js",
+      "type": "text",
+      "size": 3569,
+      "dependencies": false
+    },
+    {
+      "path": "../../apps/real-time-collaboration-workspace/backend/jest.config.js",
+      "type": "text",
+      "size": 184,
+      "dependencies": false
+    }
+  ]
+}

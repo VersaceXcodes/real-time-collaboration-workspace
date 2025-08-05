@@ -1,0 +1,15 @@
+{
+  "timestamp": 1754426416675,
+  "operation": {
+    "id": "backend:specifications:asyncapi"
+  },
+  "projectId": "real-time-collaboration-workspace",
+  "files": [
+    {
+      "path": "../../apps/real-time-collaboration-workspace/backend/asyncapi.yaml",
+      "type": "text",
+      "size": 6071,
+      "dependencies": false
+    }
+  ]
+}

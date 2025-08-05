@@ -1,0 +1,262 @@
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+import { io, Socket } from 'socket.io-client';
+import axios from 'axios';
+
+// Define Types
+interface User {
+  id: string;
+  email: string;
+  name: string;
+  created_at: string;
+}
+
+interface Workspace {
+  id: string;
+  name: string;
+}
+
+interface Channel {
+  id: string;
+  name: string;
+}
+
+interface AuthenticationState {
+  current_user: User | null;
+  auth_token: string | null;
+  authentication_status: {
+    is_authenticated: boolean;
+    is_loading: boolean;
+  };
+  error_message: string | null;
+}
+
+interface AppState {
+  authentication_state: AuthenticationState;
+  workspace_state: {
+    selected_workspace_id: string | null;
+    workspaces: Workspace[];
+  };
+  channel_state: {
+    selected_channel_id: string | null;
+    channels: Channel[];
+  };
+  theme_state: {
+    theme: 'light' | 'dark';
+  };
+  socket: Socket | null;
+
+  // Action Methods
+  login_user: (email: string, password: string) => Promise<void>;
+  logout_user: () => void;
+  initialize_auth: () => Promise<void>;
+  clear_auth_error: () => void;
+  update_user_profile: (userData: Partial<User>) => void;
+  join_workspace: (workspace_id: string) => void;
+  switch_theme: () => void;
+}
+
+export const useAppStore = create<AppState>()(
+  persist(
+    (set, get) => ({
+      // Initial states
+      authentication_state: {
+        current_user: null,
+        auth_token: null,
+        authentication_status: {
+          is_authenticated: false,
+          is_loading: true,
+        },
+        error_message: null,
+      },
+      workspace_state: {
+        selected_workspace_id: null,
+        workspaces: [],
+      },
+      channel_state: {
+        selected_channel_id: null,
+        channels: [],
+      },
+      theme_state: {
+        theme: 'light',
+      },
+      socket: null,
+
+      // Actions
+      login_user: async (email: string, password: string) => {
+        set((state) => ({
+          authentication_state: {
+            ...state.authentication_state,
+            authentication_status: {
+              ...state.authentication_state.authentication_status,
+              is_loading: true,
+            },
+            error_message: null,
+          },
+        }));
+
+        try {
+          const response = await axios.post(
+            `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/auth/login`,
+            { email, password },
+            { headers: { 'Content-Type': 'application/json' } }
+          );
+
+          const { user, auth_token } = response.data;
+
+          set((state) => ({
+            authentication_state: {
+              current_user: user,
+              auth_token: auth_token,
+              authentication_status: {
+                is_authenticated: true,
+                is_loading: false,
+              },
+              error_message: null,
+            },
+            socket: io(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}`, {
+              auth: { token: auth_token },
+            }),
+          }));
+        } catch (error: any) {
+          const errorMessage = error.response?.data?.message || 'Login failed';
+          set((state) => ({
+            authentication_state: {
+              ...state.authentication_state,
+              error_message: errorMessage,
+              authentication_status: {
+                ...state.authentication_state.authentication_status,
+                is_loading: false,
+              },
+            },
+          }));
+        }
+      },
+      
+      logout_user: () => {
+        const { socket } = get();
+        if (socket) socket.disconnect();
+
+        set((state) => ({
+          authentication_state: {
+            current_user: null,
+            auth_token: null,
+            authentication_status: {
+              is_authenticated: false,
+              is_loading: false,
+            },
+            error_message: null,
+          },
+          socket: null,
+        }));
+      },
+      
+      initialize_auth: async () => {
+        const { authentication_state } = get();
+        const auth_token = authentication_state.auth_token;
+        
+        if (!auth_token) {
+          set((state) => ({
+            authentication_state: {
+              ...state.authentication_state,
+              authentication_status: {
+                ...state.authentication_state.authentication_status,
+                is_loading: false,
+              },
+            },
+          }));
+          return;
+        }
+
+        try {
+          const response = await axios.get(
+            `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/auth/verify`,
+            { headers: { Authorization: `Bearer ${auth_token}` } }
+          );
+
+          const { user } = response.data;
+
+          set((state) => ({
+            authentication_state: {
+              current_user: user,
+              auth_token,
+              authentication_status: {
+                is_authenticated: true,
+                is_loading: false,
+              },
+              error_message: null,
+            },
+            socket: io(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}`, {
+              auth: { token: auth_token },
+            }),
+          }));
+        } catch (error) {
+          set((state) => ({
+            authentication_state: {
+              current_user: null,
+              auth_token: null,
+              authentication_status: {
+                is_authenticated: false,
+                is_loading: false,
+              },
+              error_message: null,
+            },
+          }));
+        }
+      },
+      
+      clear_auth_error: () => {
+        set((state) => ({
+          authentication_state: {
+            ...state.authentication_state,
+            error_message: null,
+          },
+        }));
+      },
+
+      update_user_profile: (userData) => {
+        set((state) => ({
+          authentication_state: {
+            ...state.authentication_state,
+            current_user: {
+              ...state.authentication_state.current_user,
+              ...userData,
+            },
+          },
+        }));
+      },
+
+      join_workspace: (workspace_id) => {
+        set((state) => ({
+          workspace_state: {
+            ...state.workspace_state,
+            selected_workspace_id: workspace_id,
+          },
+        }));
+      },
+
+      switch_theme: () => {
+        set((state) => ({
+          theme_state: {
+            theme: state.theme_state.theme === 'light' ? 'dark' : 'light',
+          },
+        }));
+      },
+    }),
+    {
+      name: 'app-storage',
+      partialize: (state) => ({
+        authentication_state: {
+          current_user: state.authentication_state.current_user,
+          auth_token: state.authentication_state.auth_token,
+          authentication_status: {
+            is_authenticated: state.authentication_state.authentication_status.is_authenticated
+          },
+        },
+        workspace_state: state.workspace_state,
+        channel_state: state.channel_state,
+        theme_state: state.theme_state,
+      }),
+    }
+  )
+);

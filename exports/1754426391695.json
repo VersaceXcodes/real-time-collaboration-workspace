@@ -1,0 +1,15 @@
+{
+  "timestamp": 1754426391695,
+  "operation": {
+    "id": "db:schemas:zod"
+  },
+  "projectId": "real-time-collaboration-workspace",
+  "files": [
+    {
+      "path": "../../apps/real-time-collaboration-workspace/backend/schema.ts",
+      "type": "text",
+      "size": 13437,
+      "dependencies": false
+    }
+  ]
+}

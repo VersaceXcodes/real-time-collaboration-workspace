@@ -1,0 +1,251 @@
+asyncapi: 2.0.0
+info:
+  title: CollabSync Real-Time API
+  version: 1.0.0
+  description: Real-time features for the CollabSync application, based on Zod
+    schema types and UX data map.
+servers:
+  production:
+    url: ws://localhost:3000
+    protocol: ws
+channels:
+  user/{user_id}/status:
+    description: Channel for publishing the online status of a user.
+    parameters:
+      user_id:
+        description: ID of the user
+        schema:
+          type: string
+    publish:
+      operationId: userStatusUpdate
+      summary: Update the online status of the user
+      message:
+        name: UserStatusUpdate
+        payload:
+          type: object
+          properties:
+            user_id:
+              type: string
+            status:
+              type: string
+              enum:
+                - online
+                - offline
+                - away
+  workspace/{workspace_id}/activities:
+    description: Publishes updates related to activities in a workspace.
+    parameters:
+      workspace_id:
+        description: ID of the workspace
+        schema:
+          type: string
+    publish:
+      operationId: workspaceActivityUpdate
+      summary: Publish new activities for a workspace
+      message:
+        name: WorkspaceActivityUpdate
+        payload:
+          type: object
+          properties:
+            workspace_id:
+              type: string
+            activity_type:
+              type: string
+            content:
+              type: string
+  channel/{channel_id}/messages:
+    description: Publishes messages sent in a specific channel.
+    parameters:
+      channel_id:
+        description: ID of the channel
+        schema:
+          type: string
+    publish:
+      operationId: channelMessageCreated
+      summary: Publish a new message to a channel
+      message:
+        name: ChannelMessageCreated
+        payload:
+          type: object
+          properties:
+            message_id:
+              type: string
+            channel_id:
+              type: string
+            user_id:
+              type: string
+            content:
+              type: string
+            sent_at:
+              type: string
+              format: date-time
+            is_read:
+              type: boolean
+  channel/{channel_id}/typing:
+    description: Typing indicators in a channel.
+    parameters:
+      channel_id:
+        description: ID of the channel
+        schema:
+          type: string
+    publish:
+      operationId: channelTypingIndicator
+      summary: Notify when a user is typing in a channel
+      message:
+        name: ChannelTypingIndicator
+        payload:
+          type: object
+          properties:
+            channel_id:
+              type: string
+            user_id:
+              type: string
+            typing:
+              type: boolean
+  document/{document_id}/edit:
+    description: Live edits made to a document.
+    parameters:
+      document_id:
+        description: ID of the document
+        schema:
+          type: string
+    publish:
+      operationId: documentEditUpdate
+      summary: Publish updates on document edits
+      message:
+        name: DocumentEditUpdate
+        payload:
+          type: object
+          properties:
+            document_id:
+              type: string
+            user_id:
+              type: string
+            content:
+              type: string
+            last_edited_at:
+              type: string
+              format: date-time
+  task/{task_id}/status:
+    description: Updates the status of a task.
+    parameters:
+      task_id:
+        description: ID of the task
+        schema:
+          type: string
+    publish:
+      operationId: taskStatusUpdate
+      summary: Publish updates to task status
+      message:
+        name: TaskStatusUpdate
+        payload:
+          type: object
+          properties:
+            task_id:
+              type: string
+            status:
+              type: string
+            priority:
+              type: string
+            assigned_user_id:
+              type: string
+              nullable: true
+            due_date:
+              type: string
+              format: date-time
+              nullable: true
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        user_id:
+          type: string
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        role:
+          type: string
+    Workspace:
+      type: object
+      properties:
+        workspace_id:
+          type: string
+        owner_user_id:
+          type: string
+        name:
+          type: string
+        settings:
+          type: object
+          nullable: true
+    Channel:
+      type: object
+      properties:
+        channel_id:
+          type: string
+        workspace_id:
+          type: string
+        name:
+          type: string
+        is_private:
+          type: boolean
+    Message:
+      type: object
+      properties:
+        message_id:
+          type: string
+        channel_id:
+          type: string
+        user_id:
+          type: string
+        content:
+          type: string
+        sent_at:
+          type: string
+          format: date-time
+        is_read:
+          type: boolean
+    Document:
+      type: object
+      properties:
+        document_id:
+          type: string
+        workspace_id:
+          type: string
+        title:
+          type: string
+        content:
+          type: string
+        last_edited_at:
+          type: string
+          format: date-time
+        version:
+          type: string
+    Task:
+      type: object
+      properties:
+        task_id:
+          type: string
+        board_id:
+          type: string
+        assigned_user_id:
+          type: string
+          nullable: true
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        status:
+          type: string
+        priority:
+          type: string
+        due_date:
+          type: string
+          format: date-time
+          nullable: true

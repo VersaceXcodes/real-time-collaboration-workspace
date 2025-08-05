@@ -1,0 +1,19 @@
+{
+  "timestamp": 1754426680260,
+  "operation": {
+    "id": "webapp:react:views",
+    "refs": {
+      "id": "UV_WorkspaceCreation",
+      "version": "latest"
+    }
+  },
+  "projectId": "real-time-collaboration-workspace",
+  "files": [
+    {
+      "path": "../../apps/real-time-collaboration-workspace/vitereact/src/components/views/UV_WorkspaceCreation.tsx",
+      "type": "text",
+      "size": 5594,
+      "dependencies": false
+    }
+  ]
+}

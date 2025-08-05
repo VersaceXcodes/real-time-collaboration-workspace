@@ -1,0 +1,19 @@
+{
+  "timestamp": 1754426668134,
+  "operation": {
+    "id": "webapp:react:views",
+    "refs": {
+      "id": "UV_TaskDetailView",
+      "version": "latest"
+    }
+  },
+  "projectId": "real-time-collaboration-workspace",
+  "files": [
+    {
+      "path": "../../apps/real-time-collaboration-workspace/vitereact/src/components/views/UV_TaskDetailView.tsx",
+      "type": "text",
+      "size": 4438,
+      "dependencies": false
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "timestamp": 1754426522402,
+  "operation": {
+    "id": "settings:config:package"
+  },
+  "projectId": "real-time-collaboration-workspace",
+  "files": [
+    {
+      "path": "../../apps/real-time-collaboration-workspace/backend/package.json",
+      "type": "text",
+      "size": 1428,
+      "dependencies": true
+    },
+    {
+      "path": "../../apps/real-time-collaboration-workspace/backend/.env",
+      "type": "text",
+      "size": 417,
+      "dependencies": false
+    }
+  ]
+}

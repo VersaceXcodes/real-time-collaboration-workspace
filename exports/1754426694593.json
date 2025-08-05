@@ -1,0 +1,19 @@
+{
+  "timestamp": 1754426694593,
+  "operation": {
+    "id": "webapp:react:views",
+    "refs": {
+      "id": "UV_HomeDashboard",
+      "version": "1754426634272"
+    }
+  },
+  "projectId": "real-time-collaboration-workspace",
+  "files": [
+    {
+      "path": "../../apps/real-time-collaboration-workspace/vitereact/src/components/views/UV_HomeDashboard.tsx",
+      "type": "text",
+      "size": 3858,
+      "dependencies": false
+    }
+  ]
+}

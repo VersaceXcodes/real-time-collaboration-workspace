@@ -1,0 +1,15 @@
+{
+  "timestamp": 1754426352168,
+  "operation": {
+    "id": "db:postgres"
+  },
+  "projectId": "real-time-collaboration-workspace",
+  "files": [
+    {
+      "path": "../../apps/real-time-collaboration-workspace/backend/db.sql",
+      "type": "text",
+      "size": 5264,
+      "dependencies": false
+    }
+  ]
+}

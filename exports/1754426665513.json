@@ -1,0 +1,19 @@
+{
+  "timestamp": 1754426665513,
+  "operation": {
+    "id": "webapp:react:views",
+    "refs": {
+      "id": "GV_NotificationPanel",
+      "version": "1754426634327"
+    }
+  },
+  "projectId": "real-time-collaboration-workspace",
+  "files": [
+    {
+      "path": "../../apps/real-time-collaboration-workspace/vitereact/src/components/views/GV_NotificationPanel.tsx",
+      "type": "text",
+      "size": 2612,
+      "dependencies": false
+    }
+  ]
+}

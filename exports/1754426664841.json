@@ -1,0 +1,15 @@
+{
+  "timestamp": 1754426664841,
+  "operation": {
+    "id": "settings:config:package"
+  },
+  "projectId": "real-time-collaboration-workspace",
+  "files": [
+    {
+      "path": "../../apps/real-time-collaboration-workspace/vitereact/package.json",
+      "type": "text",
+      "size": 3004,
+      "dependencies": true
+    }
+  ]
+}

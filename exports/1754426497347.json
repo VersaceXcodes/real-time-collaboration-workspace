@@ -1,0 +1,15 @@
+{
+  "timestamp": 1754426497347,
+  "operation": {
+    "id": "backend:server:main"
+  },
+  "projectId": "real-time-collaboration-workspace",
+  "files": [
+    {
+      "path": "../../apps/real-time-collaboration-workspace/backend/server.ts",
+      "type": "text",
+      "size": 9005,
+      "dependencies": false
+    }
+  ]
+}

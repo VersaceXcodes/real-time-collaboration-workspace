@@ -1,0 +1,19 @@
+{
+  "timestamp": 1754426661782,
+  "operation": {
+    "id": "webapp:react:views",
+    "refs": {
+      "id": "UV_DocumentEditor",
+      "version": "latest"
+    }
+  },
+  "projectId": "real-time-collaboration-workspace",
+  "files": [
+    {
+      "path": "../../apps/real-time-collaboration-workspace/vitereact/src/components/views/UV_DocumentEditor.tsx",
+      "type": "text",
+      "size": 3105,
+      "dependencies": false
+    }
+  ]
+}
