@@ -223,25 +223,26 @@ export const useAppStore = create<AppState>()(
         const { socket } = get();
         if (socket) socket.disconnect();
 
-          set((_state) => ({
-            authentication_state: {
-              current_user: user,
-              auth_token: auth_token,
-              authentication_status: {
-                is_authenticated: true,
-                is_loading: false,
-              },
-              error_message: null,
+        set((_state) => ({
+          authentication_state: {
+            current_user: null,
+            auth_token: null,
+            authentication_status: {
+              is_authenticated: false,
+              is_loading: false,
             },
-            socket: io(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}`, {
-              auth: { token: auth_token },
-              transports: ['websocket', 'polling'],
-              timeout: 20000,
-              reconnection: true,
-              reconnectionAttempts: 5,
-              reconnectionDelay: 1000,
-            }),
-          }));
+            error_message: null,
+          },
+          workspace_state: {
+            selected_workspace_id: null,
+            workspaces: [],
+          },
+          channel_state: {
+            selected_channel_id: null,
+            channels: [],
+          },
+          socket: null,
+        }));
       },
       
       initialize_auth: async () => {

@@ -7,9 +7,17 @@ describe('Server', () => {
     await pool.end();
   });
 
-  test('should respond with server status', async () => {
-    const response = await request(app).get('/');
+  test('should respond with health check', async () => {
+    const response = await request(app).get('/health');
     expect(response.status).toBe(200);
-    expect(response.body.message).toBe('Server running with authentication and WebSockets');
+    expect(response.body).toHaveProperty('status');
+    expect(response.body.status).toBe('healthy');
+  });
+
+  test('should respond with ping', async () => {
+    const response = await request(app).get('/ping');
+    expect(response.status).toBe(200);
+    expect(response.body).toHaveProperty('message');
+    expect(response.body.message).toBe('pong');
   });
 });

@@ -15,6 +15,7 @@ declare global {
     interface Request {
       user?: {
         id: string;
+        user_id?: string;
         email: string;
         name: string;
         created_at: string;
@@ -73,11 +74,24 @@ const app = express();
 const server = http.createServer(app);
 const io = new WebSocketServer(server, {
   cors: {
-    origin: [
-      process.env.FRONTEND_URL || 'http://localhost:5173',
-      'https://123real-time-collaboration-workspace.launchpulse.ai',
-      /\.launchpulse\.ai$/
-    ],
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+      
+      const allowedOrigins = [
+        process.env.FRONTEND_URL || 'http://localhost:5173',
+        'https://123real-time-collaboration-workspace.launchpulse.ai',
+        'http://localhost:5173',
+        'http://localhost:3000'
+      ];
+      
+      // Check if origin matches allowed patterns
+      if (allowedOrigins.includes(origin) || /\.launchpulse\.ai$/.test(origin)) {
+        return callback(null, true);
+      }
+      
+      return callback(new Error('Not allowed by CORS'), false);
+    },
     credentials: true,
     methods: ['GET', 'POST']
   }
@@ -85,11 +99,24 @@ const io = new WebSocketServer(server, {
 
 // Middlewares
 app.use(cors({
-  origin: [
-    process.env.FRONTEND_URL || 'http://localhost:5173',
-    'https://123real-time-collaboration-workspace.launchpulse.ai',
-    /\.launchpulse\.ai$/
-  ],
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    const allowedOrigins = [
+      process.env.FRONTEND_URL || 'http://localhost:5173',
+      'https://123real-time-collaboration-workspace.launchpulse.ai',
+      'http://localhost:5173',
+      'http://localhost:3000'
+    ];
+    
+    // Check if origin matches allowed patterns
+    if (allowedOrigins.includes(origin) || /\.launchpulse\.ai$/.test(origin)) {
+      return callback(null, true);
+    }
+    
+    return callback(new Error('Not allowed by CORS'), false);
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
@@ -126,6 +153,22 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   next();
 });
 
+// Middleware to ensure all responses are JSON
+app.use((req: Request, res: Response, next: NextFunction) => {
+  const originalSend = res.send;
+  
+  res.send = function(data: any) {
+    // Ensure Content-Type is set to application/json for API responses
+    if (!res.get('Content-Type') && req.path.startsWith('/') && req.path !== '/') {
+      res.set('Content-Type', 'application/json');
+    }
+    
+    return originalSend.call(this, data);
+  };
+  
+  next();
+});
+
 // Serve static files from the 'public' directory
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -140,7 +183,7 @@ const authenticateToken = async (req: Request, res: Response, next: NextFunction
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET) as any;
-    const result = await pool.query('SELECT id, email, name, created_at FROM users WHERE id = $1', [decoded.user_id]);
+    const result = await pool.query('SELECT user_id as id, email, name, created_at FROM users WHERE user_id = $1', [decoded.user_id]);
     
     if (result.rows.length === 0) {
       return res.status(401).json({ message: 'Invalid token' });
@@ -159,6 +202,13 @@ const authenticateToken = async (req: Request, res: Response, next: NextFunction
 app.post('/auth/register', async (req, res) => {
   try {
     const { email, password, name, role } = req.body;
+
+    // Validate required fields
+    if (!email || !password || !name) {
+      return res.status(400).json({ 
+        message: 'Missing required fields: email, password, and name are required' 
+      });
+    }
 
     // Validate input
     const parsedInput = createUserInputSchema.parse(req.body);
@@ -196,9 +246,25 @@ app.post('/auth/register', async (req, res) => {
       },
       auth_token: token
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Registration error:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    
+    if (error.name === 'ZodError') {
+      return res.status(400).json({ 
+        message: 'Invalid input data', 
+        details: error.errors 
+      });
+    }
+    
+    if (error.code === 'ECONNREFUSED' || error.code === '23505') {
+      return res.status(503).json({ 
+        message: 'Database service temporarily unavailable' 
+      });
+    }
+    
+    res.status(500).json({ 
+      message: 'Registration failed. Please try again later.' 
+    });
   }
 });
 
@@ -206,6 +272,13 @@ app.post('/auth/register', async (req, res) => {
 app.post('/auth/login', async (req, res) => {
   try {
     const { email, password } = req.body;
+
+    // Validate required fields
+    if (!email || !password) {
+      return res.status(400).json({ 
+        message: 'Missing required fields: email and password are required' 
+      });
+    }
 
     // Find user
     const result = await pool.query('SELECT * FROM users WHERE email = $1', [email.toLowerCase().trim()]);
@@ -238,9 +311,18 @@ app.post('/auth/login', async (req, res) => {
       },
       auth_token: token
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Login error:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    
+    if (error.code === 'ECONNREFUSED') {
+      return res.status(503).json({ 
+        message: 'Database service temporarily unavailable' 
+      });
+    }
+    
+    res.status(500).json({ 
+      message: 'Login failed. Please try again later.' 
+    });
   }
 });
 
@@ -249,7 +331,7 @@ app.get('/auth/verify', authenticateToken, async (req, res) => {
   try {
     res.json({
       user: {
-        user_id: req.user?.id,
+        user_id: req.user?.user_id || req.user?.id,
         email: req.user?.email,
         name: req.user?.name,
         created_at: req.user?.created_at
@@ -323,7 +405,11 @@ app.post('/workspaces', authenticateToken, async (req, res) => {
   try {
     const { name, settings } = req.body;
     const workspace_id = generateUniqueId();
-    const owner_user_id = req.user.id;
+    const owner_user_id = req.user?.id;
+
+    if (!owner_user_id) {
+      return res.status(401).json({ message: 'User authentication required' });
+    }
 
     const result = await pool.query(
       'INSERT INTO workspaces (workspace_id, name, owner_user_id, settings, created_at) VALUES ($1, $2, $3, $4, $5) RETURNING *',
@@ -347,7 +433,7 @@ app.get('/channels/:channel_id/messages', authenticateToken, async (req, res) =>
       {
         message_id: generateUniqueId(),
         channel_id,
-        user_id: req.user.id,
+        user_id: req.user?.id,
         content: 'Welcome to the channel!',
         sent_at: new Date().toISOString(),
         is_read: true
@@ -369,7 +455,7 @@ app.post('/channels/:channel_id/messages', authenticateToken, async (req, res) =
     const message = {
       message_id: generateUniqueId(),
       channel_id,
-      user_id: req.user.id,
+      user_id: req.user?.id,
       content,
       sent_at: new Date().toISOString(),
       is_read: false
@@ -393,7 +479,7 @@ app.get('/tasks/:task_id', authenticateToken, async (req, res) => {
       description: 'This is a sample task',
       status: 'in_progress',
       priority: 'medium',
-      assigned_user_id: req.user.id,
+      assigned_user_id: req.user?.id,
       due_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
       created_at: new Date().toISOString()
     };
@@ -433,14 +519,14 @@ app.get('/kanban-boards/:board_id/tasks', authenticateToken, async (req, res) =>
         title: 'Task 1',
         status: 'todo',
         priority: 'high',
-        assigned_user_id: req.user.id
+        assigned_user_id: req.user?.id
       },
       {
         task_id: generateUniqueId(),
         title: 'Task 2',
         status: 'in_progress',
         priority: 'medium',
-        assigned_user_id: req.user.id
+        assigned_user_id: req.user?.id
       }
     ];
     
@@ -494,7 +580,7 @@ app.get('/documents/:document_id', authenticateToken, async (req, res) => {
       title: 'Sample Document',
       content: 'This is sample document content',
       last_edited_at: new Date().toISOString(),
-      created_by: req.user.id
+      created_by: req.user?.id
     };
     
     res.json(mockDocument);
@@ -531,7 +617,7 @@ app.get('/calendar-events', authenticateToken, async (req, res) => {
         title: 'Team Meeting',
         start_time: new Date().toISOString(),
         end_time: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
-        created_by: req.user.id
+        created_by: req.user?.id
       }
     ];
     
@@ -551,7 +637,7 @@ app.post('/calendar-events', authenticateToken, async (req, res) => {
       title,
       start_time,
       end_time,
-      created_by: req.user.id,
+      created_by: req.user?.id,
       created_at: new Date().toISOString()
     };
     
@@ -571,7 +657,7 @@ app.get('/direct-messages/:conversation_id/messages', authenticateToken, async (
       {
         message_id: generateUniqueId(),
         conversation_id,
-        sender_id: req.user.id,
+        sender_id: req.user?.id,
         content: 'Hello!',
         sent_at: new Date().toISOString()
       }
@@ -592,7 +678,7 @@ app.post('/direct-messages/:conversation_id/messages', authenticateToken, async 
     const newMessage = {
       message_id: generateUniqueId(),
       conversation_id,
-      sender_id: req.user.id,
+      sender_id: req.user?.id,
       content,
       sent_at: new Date().toISOString()
     };
@@ -610,7 +696,7 @@ app.get('/notifications', authenticateToken, async (req, res) => {
     const mockNotifications = [
       {
         notification_id: generateUniqueId(),
-        user_id: req.user.id,
+        user_id: req.user?.id,
         type: 'message',
         content: 'You have a new message',
         is_read: false,
