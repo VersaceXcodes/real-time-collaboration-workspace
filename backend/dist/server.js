@@ -13,7 +13,10 @@ const { DATABASE_URL, PGHOST, PGDATABASE, PGUSER, PGPASSWORD, PGPORT = 5432, JWT
 const pool = new Pool(DATABASE_URL
     ? {
         connectionString: DATABASE_URL,
-        ssl: { rejectUnauthorized: false }
+        ssl: { rejectUnauthorized: false },
+        max: 20,
+        idleTimeoutMillis: 30000,
+        connectionTimeoutMillis: 2000,
     }
     : {
         host: PGHOST,
@@ -22,13 +25,41 @@ const pool = new Pool(DATABASE_URL
         password: PGPASSWORD,
         port: Number(PGPORT),
         ssl: { rejectUnauthorized: false },
+        max: 20,
+        idleTimeoutMillis: 30000,
+        connectionTimeoutMillis: 2000,
     });
+// Handle pool errors
+pool.on('error', (err) => {
+    console.error('Unexpected error on idle client', err);
+});
+// Test database connection on startup
+pool.connect((err, client, release) => {
+    if (err) {
+        console.error('Error acquiring client', err.stack);
+    }
+    else {
+        console.log('Database connected successfully');
+        if (client)
+            release();
+    }
+});
 // ESM workaround for __dirname
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const app = express();
 const server = http.createServer(app);
-const io = new WebSocketServer(server);
+const io = new WebSocketServer(server, {
+    cors: {
+        origin: [
+            process.env.FRONTEND_URL || 'http://localhost:5173',
+            'https://123real-time-collaboration-workspace.launchpulse.ai',
+            /\.launchpulse\.ai$/
+        ],
+        credentials: true,
+        methods: ['GET', 'POST']
+    }
+});
 // Middlewares
 app.use(cors({
     origin: [
@@ -40,18 +71,33 @@ app.use(cors({
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
 }));
-app.use(express.json({ limit: "5mb" }));
+// JSON parsing with error handling
+app.use(express.json({
+    limit: "5mb"
+}));
+// Handle JSON parsing errors
+app.use((err, req, res, next) => {
+    if (err instanceof SyntaxError && 'body' in err) {
+        return res.status(400).json({ message: 'Invalid JSON format' });
+    }
+    next(err);
+});
+// Handle preflight requests
+app.options('*', (req, res) => {
+    res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.sendStatus(200);
+});
 // Add request timeout middleware
 app.use((req, res, next) => {
     res.setTimeout(30000, () => {
-        res.status(408).json({ message: 'Request timeout' });
+        if (!res.headersSent) {
+            res.status(408).json({ message: 'Request timeout' });
+        }
     });
     next();
-});
-// Add error handling middleware
-app.use((err, req, res, next) => {
-    console.error('Unhandled error:', err);
-    res.status(500).json({ message: 'Internal server error' });
 });
 // Serve static files from the 'public' directory
 app.use(express.static(path.join(__dirname, 'public')));
@@ -147,10 +193,10 @@ app.get('/auth/verify', authenticateToken, async (req, res) => {
     try {
         res.json({
             user: {
-                user_id: req.user.id,
-                email: req.user.email,
-                name: req.user.name,
-                created_at: req.user.created_at
+                user_id: req.user?.id,
+                email: req.user?.email,
+                name: req.user?.name,
+                created_at: req.user?.created_at
             }
         });
     }
@@ -574,17 +620,68 @@ function generateUniqueId() {
     });
 }
 // Health check endpoint
-app.get("/health", (req, res) => {
-    res.json({
-        status: "healthy",
-        timestamp: new Date().toISOString(),
-        version: "1.0.0"
-    });
+app.get("/health", async (req, res) => {
+    try {
+        // Test database connection
+        await pool.query('SELECT 1');
+        res.json({
+            status: "healthy",
+            timestamp: new Date().toISOString(),
+            version: "1.0.0",
+            database: "connected"
+        });
+    }
+    catch (error) {
+        console.error('Health check failed:', error);
+        res.status(503).json({
+            status: "unhealthy",
+            timestamp: new Date().toISOString(),
+            version: "1.0.0",
+            database: "disconnected",
+            error: "Database connection failed"
+        });
+    }
 });
 app.get("/", (req, res) => {
-    res.json({ message: "Server running with authentication and WebSockets" });
+    res.json({
+        message: "Server running with authentication and WebSockets",
+        timestamp: new Date().toISOString(),
+        environment: process.env.NODE_ENV || 'development'
+    });
 });
-// Catch-all route for SPA routing
+// Simple ping endpoint for connectivity testing
+app.get("/ping", (req, res) => {
+    res.json({
+        message: "pong",
+        timestamp: new Date().toISOString()
+    });
+});
+// Add global error handling middleware (must be after all routes)
+app.use((err, req, res, next) => {
+    console.error('Unhandled error:', err);
+    // Handle specific error types
+    if (err.name === 'ValidationError') {
+        return res.status(400).json({
+            message: 'Validation error',
+            details: err.message
+        });
+    }
+    if (err.name === 'JsonWebTokenError') {
+        return res.status(401).json({
+            message: 'Invalid token'
+        });
+    }
+    if (err.code === 'ECONNREFUSED') {
+        return res.status(503).json({
+            message: 'Database connection failed'
+        });
+    }
+    res.status(500).json({
+        message: 'Internal server error',
+        ...(process.env.NODE_ENV === 'development' && { error: err.message })
+    });
+});
+// Catch-all route for SPA routing (must be last)
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
@@ -592,8 +689,43 @@ export { app, pool, server };
 // Start the server only if this file is run directly (not imported)
 if (import.meta.url === `file://${process.argv[1]}`) {
     const port = Number(process.env.PORT) || 3000;
+    // Handle server startup errors
+    server.on('error', (error) => {
+        if (error.code === 'EADDRINUSE') {
+            console.error(`Port ${port} is already in use`);
+            process.exit(1);
+        }
+        else {
+            console.error('Server error:', error);
+            process.exit(1);
+        }
+    });
     server.listen(port, '0.0.0.0', () => {
-        console.log(`Server running on port ${port} and listening on 0.0.0.0`);
+        console.log(`✅ Server running on port ${port} and listening on 0.0.0.0`);
+        console.log(`🌐 Frontend URL: ${process.env.FRONTEND_URL || 'http://localhost:5173'}`);
+        console.log(`🔗 API Base URL: http://localhost:${port}`);
+        console.log(`📊 Health check: http://localhost:${port}/health`);
+    });
+    // Graceful shutdown
+    process.on('SIGTERM', () => {
+        console.log('SIGTERM received, shutting down gracefully');
+        server.close(() => {
+            console.log('Server closed');
+            pool.end(() => {
+                console.log('Database pool closed');
+                process.exit(0);
+            });
+        });
+    });
+    process.on('SIGINT', () => {
+        console.log('SIGINT received, shutting down gracefully');
+        server.close(() => {
+            console.log('Server closed');
+            pool.end(() => {
+                console.log('Database pool closed');
+                process.exit(0);
+            });
+        });
     });
 }
 //# sourceMappingURL=server.js.map

@@ -3,9 +3,13 @@ import axios from 'axios';
 // Create axios instance with default configuration
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000',
-  timeout: 15000,
+  timeout: 30000, // Increased timeout
   headers: {
     'Content-Type': 'application/json',
+  },
+  validateStatus: (status) => {
+    // Accept status codes from 200-299 and 401 (for auth handling)
+    return (status >= 200 && status < 300) || status === 401;
   },
 });
 
@@ -37,16 +41,51 @@ api.interceptors.response.use(
   (response) => {
     return response;
   },
-  (error) => {
+  async (error) => {
+    const originalRequest = error.config;
+    
+    // Handle network errors
+    if (error.code === 'ECONNABORTED') {
+      console.error('Request timeout - server may be slow or unavailable');
+      return Promise.reject(new Error('Request timeout. Please try again.'));
+    }
+    
+    if (error.code === 'ERR_NETWORK') {
+      console.error('Network error - server may be unavailable');
+      return Promise.reject(new Error('Network error. Please check your connection.'));
+    }
+    
+    // Handle 401 unauthorized
     if (error.response?.status === 401) {
       // Clear auth data and redirect to login
       localStorage.removeItem('app-storage');
-      window.location.href = '/login';
-    } else if (error.code === 'ECONNABORTED') {
-      console.error('Request timeout');
-    } else if (error.response?.status >= 500) {
-      console.error('Server error:', error.response.status);
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login';
+      }
+      return Promise.reject(error);
     }
+    
+    // Handle 502 Bad Gateway with retry logic
+    if (error.response?.status === 502 && !originalRequest._retry) {
+      originalRequest._retry = true;
+      console.warn('502 Bad Gateway - retrying request...');
+      
+      // Wait 1 second before retry
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      return api(originalRequest);
+    }
+    
+    // Handle server errors
+    if (error.response?.status >= 500) {
+      console.error('Server error:', error.response.status, error.response.data);
+      return Promise.reject(new Error(`Server error (${error.response.status}). Please try again later.`));
+    }
+    
+    // Handle client errors
+    if (error.response?.status >= 400 && error.response?.status < 500) {
+      console.error('Client error:', error.response.status, error.response.data);
+    }
+    
     return Promise.reject(error);
   }
 );

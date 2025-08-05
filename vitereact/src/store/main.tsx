@@ -105,7 +105,10 @@ export const useAppStore = create<AppState>()(
           const response = await axios.post(
             `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/auth/login`,
             { email, password },
-            { headers: { 'Content-Type': 'application/json' } }
+            { 
+              headers: { 'Content-Type': 'application/json' },
+              timeout: 30000
+            }
           );
 
           const { user, auth_token } = response.data;
@@ -125,7 +128,19 @@ export const useAppStore = create<AppState>()(
             }),
           }));
         } catch (error: any) {
-          const errorMessage = error.response?.data?.message || 'Login failed';
+          console.error('Login error:', error);
+          let errorMessage = 'Login failed';
+          
+          if (error.code === 'ECONNABORTED' || error.code === 'ERR_NETWORK') {
+            errorMessage = 'Unable to connect to server. Please check your connection and try again.';
+          } else if (error.response?.status === 502) {
+            errorMessage = 'Server is temporarily unavailable. Please try again in a moment.';
+          } else if (error.response?.data?.message) {
+            errorMessage = error.response.data.message;
+          } else if (error.message) {
+            errorMessage = error.message;
+          }
+          
           set((state) => ({
             authentication_state: {
               ...state.authentication_state,
@@ -154,8 +169,11 @@ export const useAppStore = create<AppState>()(
         try {
           const response = await axios.post(
             `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/auth/register`,
-            { email, password, name },
-            { headers: { 'Content-Type': 'application/json' } }
+            { email, password, name, role: 'user' },
+            { 
+              headers: { 'Content-Type': 'application/json' },
+              timeout: 30000
+            }
           );
 
           const { user, auth_token } = response.data;
@@ -175,6 +193,19 @@ export const useAppStore = create<AppState>()(
             }),
           }));
         } catch (error: any) {
+          console.error('Registration error:', error);
+          let errorMessage = 'Registration failed';
+          
+          if (error.code === 'ECONNABORTED' || error.code === 'ERR_NETWORK') {
+            errorMessage = 'Unable to connect to server. Please check your connection and try again.';
+          } else if (error.response?.status === 502) {
+            errorMessage = 'Server is temporarily unavailable. Please try again in a moment.';
+          } else if (error.response?.data?.message) {
+            errorMessage = error.response.data.message;
+          } else if (error.message) {
+            errorMessage = error.message;
+          }
+          
           set((state) => ({
             authentication_state: {
               ...state.authentication_state,
@@ -182,7 +213,7 @@ export const useAppStore = create<AppState>()(
                 ...state.authentication_state.authentication_status,
                 is_loading: false,
               },
-              error_message: error.response?.data?.message || 'Registration failed',
+              error_message: errorMessage,
             },
           }));
         }
@@ -192,26 +223,25 @@ export const useAppStore = create<AppState>()(
         const { socket } = get();
         if (socket) socket.disconnect();
 
-        set((_state) => ({
-          authentication_state: {
-            current_user: null,
-            auth_token: null,
-            authentication_status: {
-              is_authenticated: false,
-              is_loading: false,
+          set((_state) => ({
+            authentication_state: {
+              current_user: user,
+              auth_token: auth_token,
+              authentication_status: {
+                is_authenticated: true,
+                is_loading: false,
+              },
+              error_message: null,
             },
-            error_message: null,
-          },
-          workspace_state: {
-            selected_workspace_id: null,
-            workspaces: [],
-          },
-          channel_state: {
-            selected_channel_id: null,
-            channels: [],
-          },
-          socket: null,
-        }));
+            socket: io(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}`, {
+              auth: { token: auth_token },
+              transports: ['websocket', 'polling'],
+              timeout: 20000,
+              reconnection: true,
+              reconnectionAttempts: 5,
+              reconnectionDelay: 1000,
+            }),
+          }));
       },
       
       initialize_auth: async () => {
@@ -234,7 +264,10 @@ export const useAppStore = create<AppState>()(
         try {
           const response = await axios.get(
             `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/auth/verify`,
-            { headers: { Authorization: `Bearer ${auth_token}` } }
+            { 
+              headers: { Authorization: `Bearer ${auth_token}` },
+              timeout: 30000
+            }
           );
 
           const { user } = response.data;
@@ -255,9 +288,15 @@ export const useAppStore = create<AppState>()(
             },
             socket: io(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}`, {
               auth: { token: auth_token },
+              transports: ['websocket', 'polling'],
+              timeout: 20000,
+              reconnection: true,
+              reconnectionAttempts: 5,
+              reconnectionDelay: 1000,
             }),
           }));
-        } catch (_error) {
+        } catch (error: any) {
+          console.error('Auth verification error:', error);
           set((_state) => ({
             authentication_state: {
               current_user: null,
