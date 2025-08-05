@@ -1,0 +1,126 @@
+{
+  "tech_stack": [
+    "React",
+    "Vite", 
+    "TypeScript",
+    "Express.js",
+    "PostgreSQL",
+    "Node.js",
+    "Socket.IO",
+    "Zustand",
+    "React Query",
+    "React Router",
+    "Tailwind CSS",
+    "Radix UI",
+    "JWT Authentication"
+  ],
+  "features": [
+    {
+      "name": "User Authentication",
+      "description": "Complete login/register system with JWT tokens and session management",
+      "files": [
+        "src/components/views/UV_Login.tsx",
+        "src/store/main.tsx",
+        "backend/server.ts"
+      ]
+    },
+    {
+      "name": "Home Dashboard",
+      "description": "Main application dashboard showing recent activities and workspace statistics",
+      "files": [
+        "src/components/views/UV_HomeDashboard.tsx"
+      ]
+    },
+    {
+      "name": "Workspace Management",
+      "description": "Multi-workspace collaboration with workspace creation and member management",
+      "files": [
+        "src/components/views/UV_WorkspaceCreation.tsx",
+        "src/store/main.tsx"
+      ]
+    },
+    {
+      "name": "Real-time Communication",
+      "description": "Channel-based messaging and direct messages with Socket.IO",
+      "files": [
+        "src/components/views/UV_ChannelView.tsx",
+        "src/components/views/UV_DirectMessage.tsx",
+        "backend/server.ts"
+      ]
+    },
+    {
+      "name": "Task Management",
+      "description": "Kanban board for project management with task tracking",
+      "files": [
+        "src/components/views/UV_KanbanBoard.tsx",
+        "src/components/views/UV_TaskDetailView.tsx"
+      ]
+    },
+    {
+      "name": "Document Collaboration",
+      "description": "Real-time document editing and collaboration",
+      "files": [
+        "src/components/views/UV_DocumentEditor.tsx"
+      ]
+    },
+    {
+      "name": "Calendar Integration",
+      "description": "Calendar view for scheduling and event management",
+      "files": [
+        "src/components/views/UV_Calendar.tsx"
+      ]
+    },
+    {
+      "name": "User Settings",
+      "description": "User profile management and application settings",
+      "files": [
+        "src/components/views/UV_UserSettings.tsx"
+      ]
+    },
+    {
+      "name": "Navigation System",
+      "description": "Top navigation, side navigation, and footer components",
+      "files": [
+        "src/components/views/GV_TopNav.tsx",
+        "src/components/views/GV_SideNav.tsx",
+        "src/components/views/GV_Footer.tsx"
+      ]
+    },
+    {
+      "name": "Notification System",
+      "description": "Real-time notifications panel for user alerts",
+      "files": [
+        "src/components/views/GV_NotificationPanel.tsx"
+      ]
+    }
+  ],
+  "database_tables": [
+    "users",
+    "workspaces", 
+    "workspace_members",
+    "channels",
+    "messages",
+    "files",
+    "kanban_boards",
+    "tasks",
+    "documents",
+    "calendar_events",
+    "notifications"
+  ],
+  "api_endpoints": [
+    "/auth/register",
+    "/auth/login", 
+    "/auth/verify",
+    "/users",
+    "/workspaces/:workspace_id/activities",
+    "/workspaces/:workspace_id/statistics"
+  ],
+  "websocket_events": [
+    "userStatusUpdate",
+    "workspaceActivityUpdate", 
+    "channelMessageCreated",
+    "channelTypingIndicator",
+    "documentEditUpdate",
+    "taskStatusUpdate"
+  ]
+}

@@ -1,0 +1,243 @@
+{
+  "testCases": [
+    {
+      "id": "functional-app-test",
+      "name": "Functional Application Test",
+      "category": "functionality",
+      "priority": "critical",
+      "description": "Verify the application has actual functionality beyond basic placeholder",
+      "steps": [
+        "Navigate to application URL",
+        "Verify login form is displayed with email and password fields",
+        "Check for register/login toggle functionality",
+        "Verify multiple interactive elements exist (buttons, forms, links)",
+        "Check for proper navigation structure and routing",
+        "Verify application has real features, not just 'Vite + React' text"
+      ],
+      "expectedOutcome": "Application shows functional login system and interactive features",
+      "failureCondition": "If page only shows 'Vite + React' placeholder, this test should FAIL"
+    },
+    {
+      "id": "authentication-system-test",
+      "name": "Authentication System Test",
+      "category": "authentication",
+      "priority": "critical",
+      "description": "Test complete user authentication flow including login and registration",
+      "steps": [
+        "Navigate to login page",
+        "Test registration with new user credentials",
+        "Verify successful registration redirects to dashboard",
+        "Test logout functionality",
+        "Test login with existing credentials",
+        "Verify protected routes redirect to login when not authenticated",
+        "Test session persistence across page refreshes"
+      ],
+      "expectedOutcome": "Complete authentication flow works with proper redirects and session management"
+    },
+    {
+      "id": "dashboard-functionality-test",
+      "name": "Dashboard Functionality Test",
+      "category": "interface",
+      "priority": "high",
+      "description": "Test main dashboard features and data display",
+      "steps": [
+        "Login and navigate to dashboard",
+        "Verify 'Home Dashboard' heading is displayed",
+        "Check for 'Recent Activities' section",
+        "Verify 'Workspace Statistics' section shows data",
+        "Test navigation buttons (View Kanban, Calendar)",
+        "Verify activities list displays mock data",
+        "Check statistics show channel and member counts"
+      ],
+      "expectedOutcome": "Dashboard displays all sections with proper data and navigation"
+    },
+    {
+      "id": "navigation-system-test",
+      "name": "Navigation System Test",
+      "category": "interface",
+      "priority": "high",
+      "description": "Test application navigation and routing",
+      "steps": [
+        "Verify top navigation bar is present",
+        "Check side navigation menu exists",
+        "Test routing to different sections (Calendar, Kanban, Settings)",
+        "Verify protected routes work correctly",
+        "Test browser back/forward navigation",
+        "Check footer component is displayed"
+      ],
+      "expectedOutcome": "All navigation elements work and routes function properly"
+    },
+    {
+      "id": "ui-components-test",
+      "name": "UI Components Test",
+      "category": "interface",
+      "priority": "high",
+      "description": "Test that UI components are properly implemented and styled",
+      "steps": [
+        "Check for buttons and verify they're clickable and styled",
+        "Look for forms and input fields with proper styling",
+        "Verify Tailwind CSS styling is applied correctly",
+        "Test responsive design elements",
+        "Check for loading spinners and states",
+        "Verify error message displays work",
+        "Test form validation feedback"
+      ],
+      "expectedOutcome": "Multiple interactive UI components found, functional, and properly styled"
+    },
+    {
+      "id": "workspace-features-test",
+      "name": "Workspace Features Test",
+      "category": "functionality",
+      "priority": "medium",
+      "description": "Test workspace-related functionality",
+      "steps": [
+        "Navigate to workspace creation page",
+        "Test workspace selection functionality",
+        "Verify workspace statistics are displayed",
+        "Check workspace activities feed",
+        "Test workspace member management features"
+      ],
+      "expectedOutcome": "Workspace features are accessible and functional"
+    },
+    {
+      "id": "real-time-features-test",
+      "name": "Real-time Features Test",
+      "category": "functionality",
+      "priority": "medium",
+      "description": "Test Socket.IO real-time functionality",
+      "steps": [
+        "Navigate to channel view",
+        "Test message sending functionality",
+        "Check for typing indicators",
+        "Verify real-time updates work",
+        "Test direct messaging features",
+        "Check WebSocket connection status"
+      ],
+      "expectedOutcome": "Real-time features work with proper WebSocket connections"
+    },
+    {
+      "id": "task-management-test",
+      "name": "Task Management Test",
+      "category": "functionality",
+      "priority": "medium",
+      "description": "Test Kanban board and task management features",
+      "steps": [
+        "Navigate to Kanban board",
+        "Test task creation functionality",
+        "Verify task detail view works",
+        "Check task status updates",
+        "Test drag and drop functionality if available",
+        "Verify task assignment features"
+      ],
+      "expectedOutcome": "Task management system is functional with proper CRUD operations"
+    },
+    {
+      "id": "document-collaboration-test",
+      "name": "Document Collaboration Test",
+      "category": "functionality",
+      "priority": "medium",
+      "description": "Test document editing and collaboration features",
+      "steps": [
+        "Navigate to document editor",
+        "Test document creation and editing",
+        "Verify real-time collaboration features",
+        "Check document saving functionality",
+        "Test document sharing capabilities"
+      ],
+      "expectedOutcome": "Document collaboration features work with real-time updates"
+    },
+    {
+      "id": "calendar-integration-test",
+      "name": "Calendar Integration Test",
+      "category": "functionality",
+      "priority": "medium",
+      "description": "Test calendar functionality and event management",
+      "steps": [
+        "Navigate to calendar view",
+        "Test event creation functionality",
+        "Verify calendar navigation (month/week/day views)",
+        "Check event editing and deletion",
+        "Test event scheduling features"
+      ],
+      "expectedOutcome": "Calendar system is functional with proper event management"
+    },
+    {
+      "id": "user-settings-test",
+      "name": "User Settings Test",
+      "category": "functionality",
+      "priority": "low",
+      "description": "Test user profile and settings management",
+      "steps": [
+        "Navigate to user settings page",
+        "Test profile information editing",
+        "Verify settings save functionality",
+        "Check theme switching if available",
+        "Test password change functionality"
+      ],
+      "expectedOutcome": "User settings are accessible and functional"
+    },
+    {
+      "id": "notification-system-test",
+      "name": "Notification System Test",
+      "category": "functionality",
+      "priority": "low",
+      "description": "Test notification panel and alert system",
+      "steps": [
+        "Check for notification panel visibility",
+        "Test notification display functionality",
+        "Verify notification clearing/dismissal",
+        "Check real-time notification updates",
+        "Test notification preferences if available"
+      ],
+      "expectedOutcome": "Notification system works with proper real-time updates"
+    },
+    {
+      "id": "content-quality-test",
+      "name": "Content Quality Test",
+      "category": "content",
+      "priority": "high",
+      "description": "Verify application has meaningful content and professional appearance",
+      "steps": [
+        "Check page has substantial content beyond placeholder text",
+        "Verify proper heading structure and typography",
+        "Look for actual application features and functionality",
+        "Ensure professional appearance and design",
+        "Check for consistent branding and styling",
+        "Verify all text is meaningful and contextual"
+      ],
+      "expectedOutcome": "Application demonstrates real functionality and professional design"
+    },
+    {
+      "id": "error-handling-test",
+      "name": "Error Handling Test",
+      "category": "reliability",
+      "priority": "medium",
+      "description": "Test application error handling and edge cases",
+      "steps": [
+        "Test invalid login credentials",
+        "Check network error handling",
+        "Test form validation errors",
+        "Verify loading states during API calls",
+        "Test 404 page handling",
+        "Check error message display and clarity"
+      ],
+      "expectedOutcome": "Application handles errors gracefully with proper user feedback"
+    },
+    {
+      "id": "performance-test",
+      "name": "Performance Test",
+      "category": "performance",
+      "priority": "low",
+      "description": "Test application performance and loading times",
+      "steps": [
+        "Measure initial page load time",
+        "Check for smooth navigation between pages",
+        "Verify responsive design on different screen sizes",
+        "Test application with multiple concurrent users",
+        "Check for memory leaks during extended use",
+        "Verify efficient API call patterns"
+      ],
+      "expectedOutcome": "Application performs well with reasonable load times and smooth interactions"
+    }
+  ]
+}

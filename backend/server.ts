@@ -163,6 +163,23 @@ app.post('/auth/login', async (req, res) => {
   }
 });
 
+// Auth verification endpoint
+app.get('/auth/verify', authenticateToken, async (req, res) => {
+  try {
+    res.json({
+      user: {
+        user_id: req.user.id,
+        email: req.user.email,
+        name: req.user.name,
+        created_at: req.user.created_at
+      }
+    });
+  } catch (error) {
+    console.error('Auth verification error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
 // Search users endpoint
 app.get('/users', authenticateToken, async (req, res) => {
   try {
@@ -178,6 +195,44 @@ app.get('/users', authenticateToken, async (req, res) => {
     res.json(usersResult.rows);
   } catch (error) {
     console.error('User search error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Workspace activities endpoint
+app.get('/workspaces/:workspace_id/activities', authenticateToken, async (req, res) => {
+  try {
+    const { workspace_id } = req.params;
+    
+    // Mock data for now since we don't have activities table
+    const mockActivities = [
+      { activity_type: 'Message', content: 'New message in #general channel' },
+      { activity_type: 'Task', content: 'Task "Setup project" was completed' },
+      { activity_type: 'Document', content: 'Document "Project Plan" was updated' }
+    ];
+    
+    res.json(mockActivities);
+  } catch (error) {
+    console.error('Activities fetch error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Workspace statistics endpoint
+app.get('/workspaces/:workspace_id/statistics', authenticateToken, async (req, res) => {
+  try {
+    const { workspace_id } = req.params;
+    
+    // Get actual counts from database
+    const channelsResult = await pool.query('SELECT COUNT(*) FROM channels WHERE workspace_id = $1', [workspace_id]);
+    const membersResult = await pool.query('SELECT COUNT(*) FROM workspace_members WHERE workspace_id = $1', [workspace_id]);
+    
+    res.json({
+      total_channels: parseInt(channelsResult.rows[0].count),
+      total_members: parseInt(membersResult.rows[0].count)
+    });
+  } catch (error) {
+    console.error('Statistics fetch error:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
