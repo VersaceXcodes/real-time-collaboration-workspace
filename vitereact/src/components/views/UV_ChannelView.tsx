@@ -2,10 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import axios from 'axios';
-import { io } from 'socket.io-client';
 import { useAppStore } from '@/store/main';
 import { Message } from '@schema';
-import { z } from 'zod';
 
 // Component for displaying and interacting within a channel
 const UV_ChannelView: React.FC = () => {

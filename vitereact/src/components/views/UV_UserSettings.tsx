@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useAppStore } from '@/store/main';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import axios from 'axios';
@@ -36,7 +36,7 @@ const UV_UserSettings: React.FC = () => {
   const [email, setEmail] = useState(currentUser?.email || '');
   const [feedback, setFeedback] = useState('');
 
-  const { data: userSettings, isLoading } = useQuery(
+  const { isLoading } = useQuery(
     ['userSettings', currentUser?.id],
     () => fetchUserSettings(currentUser!.id, authToken!),
     { enabled: !!currentUser }

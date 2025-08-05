@@ -32,9 +32,7 @@ const GV_SideNav: React.FC = () => {
     }
   );
 
-  // Fetch channels mock function - to replace with real API call once the backend supports it
   const fetchChannels = () => {
-    // TODO: Implement real API call to fetch channels for the selected workspace
     console.warn('MISSING ENDPOINT: Fetch channels per workspace');
     return [];
   };
@@ -84,9 +82,7 @@ const GV_SideNav: React.FC = () => {
           </ul>
 
           <h2 className="mt-6 text-lg font-semibold">Direct Messages</h2>
-          {/* Mock example for Direct Messages - Adjust logic as per data and view structure */}
           <ul className="mt-2 space-y-2">
-            {/* Map through direct message contacts and create links */}
           </ul>
 
           <h2 className="mt-6 text-lg font-semibold">Utilities</h2>

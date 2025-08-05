@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { io, Socket } from 'socket.io-client';
@@ -48,6 +49,7 @@ interface AppState {
 
   // Action Methods
   login_user: (email: string, password: string) => Promise<void>;
+  register_user: (email: string, password: string, name: string) => Promise<void>;
   logout_user: () => void;
   initialize_auth: () => Promise<void>;
   clear_auth_error: () => void;
@@ -104,7 +106,7 @@ export const useAppStore = create<AppState>()(
 
           const { user, auth_token } = response.data;
 
-          set((state) => ({
+          set((_state) => ({
             authentication_state: {
               current_user: user,
               auth_token: auth_token,
@@ -132,12 +134,61 @@ export const useAppStore = create<AppState>()(
           }));
         }
       },
+
+      register_user: async (email: string, password: string, name: string) => {
+        set((state) => ({
+          authentication_state: {
+            ...state.authentication_state,
+            authentication_status: {
+              ...state.authentication_state.authentication_status,
+              is_loading: true,
+            },
+            error_message: null,
+          },
+        }));
+
+        try {
+          const response = await axios.post(
+            `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/auth/register`,
+            { email, password, name },
+            { headers: { 'Content-Type': 'application/json' } }
+          );
+
+          const { user, auth_token } = response.data;
+
+          set((_state) => ({
+            authentication_state: {
+              current_user: user,
+              auth_token: auth_token,
+              authentication_status: {
+                is_authenticated: true,
+                is_loading: false,
+              },
+              error_message: null,
+            },
+            socket: io(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}`, {
+              auth: { token: auth_token },
+            }),
+          }));
+        } catch (error: any) {
+          set((state) => ({
+            authentication_state: {
+              ...state.authentication_state,
+              authentication_status: {
+                ...state.authentication_state.authentication_status,
+                is_loading: false,
+              },
+              error_message: error.response?.data?.message || 'Registration failed',
+            },
+          }));
+        }
+      },
       
       logout_user: () => {
         const { socket } = get();
         if (socket) socket.disconnect();
 
-        set((state) => ({
+        set((_state) => ({
           authentication_state: {
             current_user: null,
             auth_token: null,
@@ -176,7 +227,7 @@ export const useAppStore = create<AppState>()(
 
           const { user } = response.data;
 
-          set((state) => ({
+          set((_state) => ({
             authentication_state: {
               current_user: user,
               auth_token,
@@ -190,8 +241,8 @@ export const useAppStore = create<AppState>()(
               auth: { token: auth_token },
             }),
           }));
-        } catch (error) {
-          set((state) => ({
+        } catch (_error) {
+          set((_state) => ({
             authentication_state: {
               current_user: null,
               auth_token: null,
@@ -218,10 +269,10 @@ export const useAppStore = create<AppState>()(
         set((state) => ({
           authentication_state: {
             ...state.authentication_state,
-            current_user: {
+            current_user: state.authentication_state.current_user ? {
               ...state.authentication_state.current_user,
               ...userData,
-            },
+            } : null,
           },
         }));
       },

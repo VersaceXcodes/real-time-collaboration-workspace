@@ -3,8 +3,7 @@ import axios from 'axios';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAppStore } from '@/store/main';
 import { Notification } from '@schema';
-import { notificationSchema } from '@schema'; // Ensure Zod schemas are imported correctly
-import z from 'zod'; // Ensure Zod is imported
+import { notificationSchema } from '@schema';
 
 const GV_NotificationPanel: React.FC = () => {
   const authToken = useAppStore(state => state.authentication_state.auth_token);

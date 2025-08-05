@@ -22,8 +22,7 @@ import UV_TaskDetailView from '@/components/views/UV_TaskDetailView.tsx';
 import UV_DocumentEditor from '@/components/views/UV_DocumentEditor.tsx';
 import UV_Calendar from '@/components/views/UV_Calendar.tsx';
 import UV_UserSettings from '@/components/views/UV_UserSettings.tsx';
-// Mocked Login component as placeholder
-const UV_Login: React.FC = () => <div>Login Page</div>;
+import UV_Login from '@/components/views/UV_Login.tsx';
 
 const queryClient = new QueryClient({
   defaultOptions: {

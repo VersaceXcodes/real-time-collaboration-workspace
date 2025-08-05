@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { useAppStore } from '@/store/main';
-import { Task, KanbanBoard } from '@schema';
+import { Task } from '@schema';
 
 const UV_KanbanBoard: React.FC = () => {
   const { board_id } = useParams<{ board_id: string }>();
