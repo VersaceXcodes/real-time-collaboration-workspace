@@ -16,23 +16,35 @@ interface WorkspaceStatistics {
 }
 
 const fetchRecentActivities = async (workspace_id: string, auth_token: string) => {
-  const { data } = await axios.get<Activity[]>(
-    `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/workspaces/${workspace_id}/activities`,
-    {
-      headers: { Authorization: `Bearer ${auth_token}` },
-    }
-  );
-  return data;
+  try {
+    const { data } = await axios.get<Activity[]>(
+      `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/workspaces/${workspace_id}/activities`,
+      {
+        headers: { Authorization: `Bearer ${auth_token}` },
+        timeout: 10000,
+      }
+    );
+    return data;
+  } catch (error) {
+    console.error('Failed to fetch activities:', error);
+    throw error;
+  }
 };
 
 const fetchWorkspaceStatistics = async (workspace_id: string, auth_token: string) => {
-  const { data } = await axios.get<WorkspaceStatistics>(
-    `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/workspaces/${workspace_id}/statistics`,
-    {
-      headers: { Authorization: `Bearer ${auth_token}` },
-    }
-  );
-  return data;
+  try {
+    const { data } = await axios.get<WorkspaceStatistics>(
+      `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/workspaces/${workspace_id}/statistics`,
+      {
+        headers: { Authorization: `Bearer ${auth_token}` },
+        timeout: 10000,
+      }
+    );
+    return data;
+  } catch (error) {
+    console.error('Failed to fetch statistics:', error);
+    throw error;
+  }
 };
 
 const UV_HomeDashboard: React.FC = () => {
