@@ -56,6 +56,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 
 const App: React.FC = () => {
   const isLoading = useAppStore(state => state.authentication_state.authentication_status.is_loading);
+  const isAuthenticated = useAppStore(state => state.authentication_state.authentication_status.is_authenticated);
   const initializeAuth = useAppStore(state => state.initialize_auth);
 
   useEffect(() => {
@@ -70,8 +71,8 @@ const App: React.FC = () => {
     <Router>
       <QueryClientProvider client={queryClient}>
         <div className="App min-h-screen flex flex-col">
-          <GV_TopNav />
-          <GV_SideNav />
+          {isAuthenticated && <GV_TopNav />}
+          {isAuthenticated && <GV_SideNav />}
           <main className="flex-1">
             <Routes>
               <Route path="/login" element={<UV_Login />} />
@@ -89,8 +90,8 @@ const App: React.FC = () => {
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </main>
-          <GV_NotificationPanel />
-          <GV_Footer />
+          {isAuthenticated && <GV_NotificationPanel />}
+          {isAuthenticated && <GV_Footer />}
         </div>
       </QueryClientProvider>
     </Router>

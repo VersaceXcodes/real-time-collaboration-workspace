@@ -4,7 +4,7 @@ import * as dotenv from "dotenv";
 import * as fs from "fs";
 import * as path from 'path';
 import { fileURLToPath } from 'url';
-import * as jwt from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 import { Server as WebSocketServer } from 'socket.io';
 import * as http from 'http';
 import { Pool } from 'pg';

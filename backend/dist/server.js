@@ -3,7 +3,7 @@ import cors from "cors";
 import * as dotenv from "dotenv";
 import * as path from 'path';
 import { fileURLToPath } from 'url';
-import * as jwt from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 import { Server as WebSocketServer } from 'socket.io';
 import * as http from 'http';
 import { Pool } from 'pg';
