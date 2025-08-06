@@ -1,5 +1,5 @@
 -- Create users table
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
     user_id VARCHAR PRIMARY KEY,
     email VARCHAR UNIQUE NOT NULL,
     name VARCHAR NOT NULL,
@@ -11,10 +11,11 @@ CREATE TABLE users (
 -- Create example users
 INSERT INTO users (user_id, email, name, created_at, password_hash, role) VALUES
 ('user1', 'john.doe@example.com', 'John Doe', '2023-10-01T10:00:00Z', 'password123', 'admin'),
-('user2', 'jane.smith@example.com', 'Jane Smith', '2023-10-02T11:00:00Z', 'admin123', 'editor');
+('user2', 'jane.smith@example.com', 'Jane Smith', '2023-10-02T11:00:00Z', 'admin123', 'editor')
+ON CONFLICT (user_id) DO NOTHING;
 
 -- Create workspaces table
-CREATE TABLE workspaces (
+CREATE TABLE IF NOT EXISTS workspaces (
     workspace_id VARCHAR PRIMARY KEY,
     owner_user_id VARCHAR NOT NULL REFERENCES users(user_id),
     name VARCHAR NOT NULL,
@@ -23,10 +24,11 @@ CREATE TABLE workspaces (
 
 -- Create example workspaces
 INSERT INTO workspaces (workspace_id, owner_user_id, name, settings) VALUES
-('workspace1', 'user1', 'Acme Workspace', '{"theme": "dark"}');
+('workspace1', 'user1', 'Acme Workspace', '{"theme": "dark"}')
+ON CONFLICT (workspace_id) DO NOTHING;
 
 -- Create workspace_members table
-CREATE TABLE workspace_members (
+CREATE TABLE IF NOT EXISTS workspace_members (
     workspace_id VARCHAR NOT NULL REFERENCES workspaces(workspace_id),
     user_id VARCHAR NOT NULL REFERENCES users(user_id),
     role VARCHAR NOT NULL,
@@ -36,10 +38,11 @@ CREATE TABLE workspace_members (
 -- Create example workspace_members
 INSERT INTO workspace_members (workspace_id, user_id, role) VALUES
 ('workspace1', 'user1', 'owner'),
-('workspace1', 'user2', 'member');
+('workspace1', 'user2', 'member')
+ON CONFLICT (workspace_id, user_id) DO NOTHING;
 
 -- Create channels table
-CREATE TABLE channels (
+CREATE TABLE IF NOT EXISTS channels (
     channel_id VARCHAR PRIMARY KEY,
     workspace_id VARCHAR NOT NULL REFERENCES workspaces(workspace_id),
     name VARCHAR NOT NULL,
@@ -49,10 +52,11 @@ CREATE TABLE channels (
 -- Create example channels
 INSERT INTO channels (channel_id, workspace_id, name, is_private) VALUES
 ('channel1', 'workspace1', 'General', false),
-('channel2', 'workspace1', 'Private Chat', true);
+('channel2', 'workspace1', 'Private Chat', true)
+ON CONFLICT (channel_id) DO NOTHING;
 
 -- Create messages table
-CREATE TABLE messages (
+CREATE TABLE IF NOT EXISTS messages (
     message_id VARCHAR PRIMARY KEY,
     channel_id VARCHAR NOT NULL REFERENCES channels(channel_id),
     user_id VARCHAR NOT NULL REFERENCES users(user_id),
@@ -64,10 +68,11 @@ CREATE TABLE messages (
 -- Create example messages
 INSERT INTO messages (message_id, channel_id, user_id, content, sent_at, is_read) VALUES
 ('message1', 'channel1', 'user1', 'Hello everyone!', '2023-10-03T12:00:00Z', true),
-('message2', 'channel1', 'user2', 'Hi John!', '2023-10-03T12:01:00Z', false);
+('message2', 'channel1', 'user2', 'Hi John!', '2023-10-03T12:01:00Z', false)
+ON CONFLICT (message_id) DO NOTHING;
 
 -- Create files table
-CREATE TABLE files (
+CREATE TABLE IF NOT EXISTS files (
     file_id VARCHAR PRIMARY KEY,
     channel_id VARCHAR REFERENCES channels(channel_id),
     uploader_user_id VARCHAR NOT NULL REFERENCES users(user_id),
@@ -77,10 +82,11 @@ CREATE TABLE files (
 
 -- Create example files
 INSERT INTO files (file_id, channel_id, uploader_user_id, file_url, uploaded_at) VALUES
-('file1', 'channel1', 'user1', 'https://picsum.photos/200/300?random=1', '2023-10-04T14:00:00Z');
+('file1', 'channel1', 'user1', 'https://picsum.photos/200/300?random=1', '2023-10-04T14:00:00Z')
+ON CONFLICT (file_id) DO NOTHING;
 
 -- Create kanban_boards table
-CREATE TABLE kanban_boards (
+CREATE TABLE IF NOT EXISTS kanban_boards (
     board_id VARCHAR PRIMARY KEY,
     workspace_id VARCHAR NOT NULL REFERENCES workspaces(workspace_id),
     name VARCHAR NOT NULL
@@ -88,10 +94,11 @@ CREATE TABLE kanban_boards (
 
 -- Create example kanban_boards
 INSERT INTO kanban_boards (board_id, workspace_id, name) VALUES
-('board1', 'workspace1', 'Development Board');
+('board1', 'workspace1', 'Development Board')
+ON CONFLICT (board_id) DO NOTHING;
 
 -- Create tasks table
-CREATE TABLE tasks (
+CREATE TABLE IF NOT EXISTS tasks (
     task_id VARCHAR PRIMARY KEY,
     board_id VARCHAR NOT NULL REFERENCES kanban_boards(board_id),
     assigned_user_id VARCHAR REFERENCES users(user_id),
@@ -104,10 +111,11 @@ CREATE TABLE tasks (
 
 -- Create example tasks
 INSERT INTO tasks (task_id, board_id, assigned_user_id, title, description, status, priority, due_date) VALUES
-('task1', 'board1', 'user2', 'Design Homepage', 'Create a responsive homepage', 'To Do', 'High', '2023-11-01');
+('task1', 'board1', 'user2', 'Design Homepage', 'Create a responsive homepage', 'To Do', 'High', '2023-11-01')
+ON CONFLICT (task_id) DO NOTHING;
 
 -- Create documents table
-CREATE TABLE documents (
+CREATE TABLE IF NOT EXISTS documents (
     document_id VARCHAR PRIMARY KEY,
     workspace_id VARCHAR NOT NULL REFERENCES workspaces(workspace_id),
     title VARCHAR NOT NULL,
@@ -118,10 +126,11 @@ CREATE TABLE documents (
 
 -- Create example documents
 INSERT INTO documents (document_id, workspace_id, title, content, last_edited_at, version) VALUES
-('doc1', 'workspace1', 'Q3 Report', 'This is the Q3 financial report...', '2023-10-03T12:00:00Z', '1.0');
+('doc1', 'workspace1', 'Q3 Report', 'This is the Q3 financial report...', '2023-10-03T12:00:00Z', '1.0')
+ON CONFLICT (document_id) DO NOTHING;
 
 -- Create calendar_events table
-CREATE TABLE calendar_events (
+CREATE TABLE IF NOT EXISTS calendar_events (
     event_id VARCHAR PRIMARY KEY,
     workspace_id VARCHAR NOT NULL REFERENCES workspaces(workspace_id),
     title VARCHAR NOT NULL,
@@ -132,10 +141,11 @@ CREATE TABLE calendar_events (
 
 -- Create example calendar_events
 INSERT INTO calendar_events (event_id, workspace_id, title, start_time, end_time, description) VALUES
-('event1', 'workspace1', 'Sprint Planning', '2023-10-08T09:00:00Z', '2023-10-08T11:00:00Z', 'Sprint Planning meeting');
+('event1', 'workspace1', 'Sprint Planning', '2023-10-08T09:00:00Z', '2023-10-08T11:00:00Z', 'Sprint Planning meeting')
+ON CONFLICT (event_id) DO NOTHING;
 
 -- Create notifications table
-CREATE TABLE notifications (
+CREATE TABLE IF NOT EXISTS notifications (
     notification_id VARCHAR PRIMARY KEY,
     user_id VARCHAR NOT NULL REFERENCES users(user_id),
     content VARCHAR NOT NULL,
@@ -145,4 +155,5 @@ CREATE TABLE notifications (
 
 -- Create example notifications
 INSERT INTO notifications (notification_id, user_id, content, created_at, is_read) VALUES
-('notif1', 'user1', 'You have a new message in General', '2023-10-04T12:00:00Z', false);
+('notif1', 'user1', 'You have a new message in General', '2023-10-04T12:00:00Z', false)
+ON CONFLICT (notification_id) DO NOTHING;
