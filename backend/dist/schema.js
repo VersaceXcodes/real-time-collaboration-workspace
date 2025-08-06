@@ -11,8 +11,8 @@ export const userSchema = z.object({
 export const createUserInputSchema = z.object({
     email: z.string().email(),
     name: z.string().min(1).max(255),
-    password_hash: z.string(),
-    role: z.string().min(1)
+    password: z.string().min(6),
+    role: z.string().min(1).optional().default('user')
 });
 export const updateUserInputSchema = z.object({
     user_id: z.string(),

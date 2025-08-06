@@ -1,8 +1,8 @@
 import React from 'react';
-import axios from 'axios';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAppStore } from '@/store/main';
 import { notificationSchema } from '@schema';
+import api from '@/lib/api';
 
 const GV_NotificationPanel: React.FC = () => {
   const authToken = useAppStore(state => state.authentication_state.auth_token);
@@ -12,26 +12,20 @@ const GV_NotificationPanel: React.FC = () => {
   const { data: notifications, isLoading, isError, error } = useQuery({
     queryKey: ['notifications'],
     queryFn: async () => {
-      const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/notifications`, {
-        headers: {
-          Authorization: `Bearer ${authToken}`
-        }
-      });
+      const response = await api.get('/notifications');
       return notificationSchema.array().parse(response.data);
-    }
+    },
+    enabled: !!authToken
   });
 
   // Mutation to mark a notification as read
   const { mutate: markAsRead } = useMutation({
     mutationFn: (notification_id: string) => {
-      return axios.patch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/notifications/${notification_id}/read`, {}, {
-        headers: {
-          Authorization: `Bearer ${authToken}`
-        }
-      });
+      return api.patch(`/notifications/${notification_id}/read`, {});
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      queryClient.invalidateQueries({ queryKey: ['notificationsCount'] });
     }
   });
 

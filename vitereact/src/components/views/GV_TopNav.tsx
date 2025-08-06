@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
 import { useQuery } from '@tanstack/react-query';
 import { useAppStore } from '@/store/main';
 import { FaBell, FaSearch, FaUserCircle } from 'react-icons/fa';
+import api from '@/lib/api';
 
 const GV_TopNav: React.FC = () => {
   // Zustand state selectors
@@ -18,14 +18,7 @@ const GV_TopNav: React.FC = () => {
   const notification_count = useQuery({
     queryKey: ['notificationsCount'],
     queryFn: async () => {
-      const response = await axios.get(
-        `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/notifications/count`,
-        {
-          headers: {
-            Authorization: `Bearer ${auth_token}`
-          }
-        }
-      );
+      const response = await api.get('/notifications/count');
       return response.data.unread_count;
     },
     enabled: !!auth_token, // Only fetch if token exists
