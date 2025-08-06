@@ -5,16 +5,17 @@ describe('Server', () => {
         // Close database connections
         await pool.end();
     });
-    test('should respond with server status', async () => {
-        const response = await request(app).get('/');
-        console.log('Response status:', response.status);
-        console.log('Response body:', response.body);
-        console.log('Response text:', response.text);
+    test('should respond with health check', async () => {
+        const response = await request(app).get('/health');
         expect(response.status).toBe(200);
-        // Temporarily comment out the failing assertions to see what we get
-        // expect(response.body).toHaveProperty('message');
-        // expect(response.body).toHaveProperty('timestamp');
-        // expect(response.body.message).toBe('Server running with authentication and WebSockets');
+        expect(response.body).toHaveProperty('status');
+        expect(response.body.status).toBe('healthy');
+    });
+    test('should respond with ping', async () => {
+        const response = await request(app).get('/ping');
+        expect(response.status).toBe(200);
+        expect(response.body).toHaveProperty('message');
+        expect(response.body.message).toBe('pong');
     });
 });
 //# sourceMappingURL=server.test.js.map
