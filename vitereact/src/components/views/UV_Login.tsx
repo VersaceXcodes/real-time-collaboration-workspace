@@ -3,6 +3,7 @@
 
 import React, { useState } from 'react';
 import { useAppStore } from '@/store/main';
+import loginHeaderImage from '@/assets/login-header-image.png';
 
 const UV_Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -46,6 +47,13 @@ const UV_Login: React.FC = () => {
       <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full space-y-8">
           <div>
+            <div className="flex justify-center mb-6">
+              <img 
+                src={loginHeaderImage} 
+                alt="Login Header" 
+                className="max-w-full h-auto rounded-lg shadow-sm"
+              />
+            </div>
             <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
               {isRegisterMode ? 'Create your account' : 'Sign in to your account'}
             </h2>
