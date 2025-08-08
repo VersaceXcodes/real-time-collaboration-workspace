@@ -3,7 +3,7 @@
 
 import React, { useState } from 'react';
 import { useAppStore } from '@/store/main';
-import loginHeaderImage from '@/assets/login-header-image.png';
+import loginHeaderImage from '@/assets/new-login-header.png';
 
 const UV_Login: React.FC = () => {
   const [email, setEmail] = useState('');
