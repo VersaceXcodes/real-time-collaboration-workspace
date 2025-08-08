@@ -3,7 +3,7 @@
 
 import React, { useState } from 'react';
 import { useAppStore } from '@/store/main';
-import loginHeaderImage from '@/assets/new-login-header.png';
+import collaborationWorkspaceImage from '@/assets/collaboration-workspace.png';
 
 const UV_Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -49,8 +49,8 @@ const UV_Login: React.FC = () => {
           <div>
             <div className="flex justify-center mb-6">
               <img 
-                src={loginHeaderImage} 
-                alt="Login Header" 
+                src={collaborationWorkspaceImage} 
+                alt="Real-time Collaboration Workspace" 
                 className="max-w-full h-auto rounded-lg shadow-sm"
               />
             </div>
