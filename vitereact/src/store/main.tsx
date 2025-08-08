@@ -223,34 +223,31 @@ export const useAppStore = create<AppState>()(
         const { socket } = get();
         if (socket) socket.disconnect();
 
-          set((_state) => ({
-            authentication_state: {
-              current_user: user,
-              auth_token: auth_token,
-              authentication_status: {
-                is_authenticated: true,
-                is_loading: false,
-              },
-              error_message: null,
+        set((_state) => ({
+          authentication_state: {
+            current_user: null,
+            auth_token: null,
+            authentication_status: {
+              is_authenticated: false,
+              is_loading: false,
             },
-            workspace_state: {
-              selected_workspace_id: 'workspace1', // Set default workspace
-              workspaces: [],
-            },
-            socket: io(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}`, {
-              auth: { token: auth_token },
-            }),
-          }));
-          
-          // Redirect to home page after successful login
-          if (window.location.pathname === '/login') {
-            window.location.href = '/';
-          }
-          
-          // Redirect to home page after successful registration
-          if (window.location.pathname === '/login') {
-            window.location.href = '/';
-          }
+            error_message: null,
+          },
+          workspace_state: {
+            selected_workspace_id: null,
+            workspaces: [],
+          },
+          channel_state: {
+            selected_channel_id: null,
+            channels: [],
+          },
+          socket: null,
+        }));
+        
+        // Redirect to login page after logout
+        if (window.location.pathname !== '/login') {
+          window.location.href = '/login';
+        }
       },
       
       initialize_auth: async () => {
