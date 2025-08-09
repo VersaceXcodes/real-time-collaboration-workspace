@@ -16,7 +16,8 @@ interface Workspace {
   workspace_id: string;
   name: string;
   owner_user_id: string;
-  settings: { [k: string]: unknown } | null;
+  settings: Record<string, any>;
+  created_at: string;
 }
 
 interface Channel {
@@ -24,6 +25,7 @@ interface Channel {
   name: string;
   workspace_id: string;
   is_private: boolean;
+  created_at: string;
 }
 
 interface AuthenticationState {
@@ -223,25 +225,18 @@ export const useAppStore = create<AppState>()(
         const { socket } = get();
         if (socket) socket.disconnect();
 
-          set((_state) => ({
-            authentication_state: {
-              current_user: user,
-              auth_token: auth_token,
-              authentication_status: {
-                is_authenticated: true,
-                is_loading: false,
-              },
-              error_message: null,
+        set((_state) => ({
+          authentication_state: {
+            current_user: null,
+            auth_token: null,
+            authentication_status: {
+              is_authenticated: false,
+              is_loading: false,
             },
-            socket: io(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}`, {
-              auth: { token: auth_token },
-            }),
-          }));
-
-          // Redirect to dashboard after successful login
-          if (window.location.pathname === '/login') {
-            window.location.href = '/';
-          }
+            error_message: null,
+          },
+          socket: null,
+        }));
         
         // Redirect to login page after logout
         if (window.location.pathname !== '/login') {

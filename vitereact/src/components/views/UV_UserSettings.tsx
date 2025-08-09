@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useAppStore } from '@/store/main';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import axios from 'axios';
-import { User, updateUserInputSchema } from '@/types';
+import { User } from '@/types';
 
 const fetchUserSettings = async (user_id: string, authToken: string): Promise<User> => {
   const { data } = await axios.get(

@@ -1,7 +1,6 @@
 import React from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAppStore } from '@/store/main';
-import { notificationSchema } from '@/types';
 import api from '@/lib/api';
 
 const GV_NotificationPanel: React.FC = () => {

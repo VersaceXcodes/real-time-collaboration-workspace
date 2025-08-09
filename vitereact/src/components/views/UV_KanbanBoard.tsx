@@ -8,7 +8,7 @@ import { Task, CreateTaskInput } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
@@ -17,7 +17,6 @@ const UV_KanbanBoard: React.FC = () => {
 
   // Auth token from global state
   const authToken = useAppStore(state => state.authentication_state.auth_token);
-  const selectedWorkspaceId = useAppStore(state => state.workspace_state.selected_workspace_id);
 
   // Zustand operations or specific selectors can go here
   const [columns, setColumns] = useState<{ [key: string]: Task[] }>({});
