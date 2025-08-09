@@ -5,11 +5,44 @@ import React, { useState } from 'react';
 import { useAppStore } from '@/store/main';
 import collaborationWorkspaceImage from '@/assets/collaboration-workspace.png';
 
+// Translation object for Arabic
+const translations = {
+  en: {
+    createAccount: 'Create your account',
+    signIn: 'Sign in to your account',
+    fullName: 'Full Name',
+    emailAddress: 'Email address',
+    password: 'Password',
+    creatingAccount: 'Creating account...',
+    signingIn: 'Signing in...',
+    createAccountBtn: 'Create account',
+    signInBtn: 'Sign in',
+    alreadyHaveAccount: 'Already have an account? Sign in',
+    dontHaveAccount: "Don't have an account? Sign up",
+    altText: 'Real-time Collaboration Workspace'
+  },
+  ar: {
+    createAccount: 'إنشاء حسابك',
+    signIn: 'تسجيل الدخول إلى حسابك',
+    fullName: 'الاسم الكامل',
+    emailAddress: 'عنوان البريد الإلكتروني',
+    password: 'كلمة المرور',
+    creatingAccount: 'جاري إنشاء الحساب...',
+    signingIn: 'جاري تسجيل الدخول...',
+    createAccountBtn: 'إنشاء حساب',
+    signInBtn: 'تسجيل الدخول',
+    alreadyHaveAccount: 'لديك حساب بالفعل؟ سجل الدخول',
+    dontHaveAccount: 'ليس لديك حساب؟ سجل الآن',
+    altText: 'مساحة عمل التعاون في الوقت الفعلي'
+  }
+};
+
 const UV_Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [isRegisterMode, setIsRegisterMode] = useState(false);
+  const [language, setLanguage] = useState<'en' | 'ar'>('en');
   
   // CRITICAL: Individual selectors, no object destructuring
   const isLoading = useAppStore(state => state.authentication_state.authentication_status.is_loading);
@@ -42,20 +75,34 @@ const UV_Login: React.FC = () => {
     setName('');
   };
 
+  const toggleLanguage = () => {
+    setLanguage(language === 'en' ? 'ar' : 'en');
+  };
+
+  const t = translations[language];
+
   return (
     <>
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className={`min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 ${language === 'ar' ? 'rtl' : 'ltr'}`}>
         <div className="max-w-md w-full space-y-8">
           <div>
+            <div className="flex justify-between items-center mb-6">
+              <button
+                onClick={toggleLanguage}
+                className="text-blue-600 hover:text-blue-500 text-sm font-medium px-3 py-1 border border-blue-600 rounded-md"
+              >
+                {language === 'en' ? 'العربية' : 'English'}
+              </button>
+            </div>
             <div className="flex justify-center mb-6">
               <img 
                 src={collaborationWorkspaceImage} 
-                alt="Real-time Collaboration Workspace" 
+                alt={t.altText} 
                 className="max-w-full h-auto rounded-lg shadow-sm"
               />
             </div>
             <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-              {isRegisterMode ? 'Create your account' : 'Sign in to your account'}
+              {isRegisterMode ? t.createAccount : t.signIn}
             </h2>
           </div>
           
@@ -70,7 +117,7 @@ const UV_Login: React.FC = () => {
               {isRegisterMode && (
                 <div>
                   <label htmlFor="name" className="sr-only">
-                    Full Name
+                    {t.fullName}
                   </label>
                   <input
                     id="name"
@@ -79,15 +126,16 @@ const UV_Login: React.FC = () => {
                     required={isRegisterMode}
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder="Full Name"
+                    placeholder={t.fullName}
                     className="relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                    dir={language === 'ar' ? 'rtl' : 'ltr'}
                   />
                 </div>
               )}
               
               <div>
                 <label htmlFor="email" className="sr-only">
-                  Email address
+                  {t.emailAddress}
                 </label>
                 <input
                   id="email"
@@ -97,14 +145,15 @@ const UV_Login: React.FC = () => {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Email address"
+                  placeholder={t.emailAddress}
                   className="relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                  dir={language === 'ar' ? 'rtl' : 'ltr'}
                 />
               </div>
               
               <div>
                 <label htmlFor="password" className="sr-only">
-                  Password
+                  {t.password}
                 </label>
                 <input
                   id="password"
@@ -114,8 +163,9 @@ const UV_Login: React.FC = () => {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Password"
+                  placeholder={t.password}
                   className="relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                  dir={language === 'ar' ? 'rtl' : 'ltr'}
                 />
               </div>
             </div>
@@ -132,10 +182,10 @@ const UV_Login: React.FC = () => {
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    {isRegisterMode ? 'Creating account...' : 'Signing in...'}
+                    {isRegisterMode ? t.creatingAccount : t.signingIn}
                   </span>
                 ) : (
-                  isRegisterMode ? 'Create account' : 'Sign in'
+                  isRegisterMode ? t.createAccountBtn : t.signInBtn
                 )}
               </button>
             </div>
@@ -147,8 +197,8 @@ const UV_Login: React.FC = () => {
                 className="text-blue-600 hover:text-blue-500 text-sm font-medium"
               >
                 {isRegisterMode 
-                  ? 'Already have an account? Sign in' 
-                  : "Don't have an account? Sign up"
+                  ? t.alreadyHaveAccount
+                  : t.dontHaveAccount
                 }
               </button>
             </div>
