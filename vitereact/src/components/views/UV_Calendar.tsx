@@ -15,29 +15,67 @@ interface CalendarEvent {
 }
 
 const fetchEvents = async (authToken: string): Promise<CalendarEvent[]> => {
-  const { data } = await axios.get(
-    `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/api/calendar_events`, 
-    { headers: { Authorization: `Bearer ${authToken}` } }
-  );
-  return data.events.map((event: any) => ({
-    event_id: event.event_id,
-    title: event.title,
-    start_time: new Date(event.start_time),
-    end_time: new Date(event.end_time),
-    description: event.description,
-  }));
+  try {
+    const apiUrl = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/api/calendar_events`;
+    console.log('Fetching calendar events from:', apiUrl);
+    
+    const { data } = await axios.get(apiUrl, { 
+      headers: { 
+        Authorization: `Bearer ${authToken}`,
+        'Content-Type': 'application/json'
+      },
+      timeout: 10000
+    });
+    
+    console.log('Calendar events response:', data);
+    
+    if (!data.events || !Array.isArray(data.events)) {
+      throw new Error('Invalid response format: events array not found');
+    }
+    
+    return data.events.map((event: any) => ({
+      event_id: event.event_id,
+      title: event.title,
+      start_time: new Date(event.start_time),
+      end_time: new Date(event.end_time),
+      description: event.description,
+    }));
+  } catch (error: any) {
+    console.error('Error fetching calendar events:', error);
+    if (error.response) {
+      console.error('Response status:', error.response.status);
+      console.error('Response data:', error.response.data);
+    }
+    throw error;
+  }
 };
 
 const createEvent = async (
   newEvent: Omit<CalendarEvent, 'event_id'>, 
   authToken: string
 ): Promise<any> => {
-  const { data } = await axios.post(
-    `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/api/calendar_events`, 
-    newEvent, 
-    { headers: { Authorization: `Bearer ${authToken}`, 'Content-Type': 'application/json' } }
-  );
-  return data;
+  try {
+    const apiUrl = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/api/calendar_events`;
+    console.log('Creating calendar event at:', apiUrl, newEvent);
+    
+    const { data } = await axios.post(apiUrl, newEvent, { 
+      headers: { 
+        Authorization: `Bearer ${authToken}`, 
+        'Content-Type': 'application/json' 
+      },
+      timeout: 10000
+    });
+    
+    console.log('Event creation response:', data);
+    return data;
+  } catch (error: any) {
+    console.error('Error creating calendar event:', error);
+    if (error.response) {
+      console.error('Response status:', error.response.status);
+      console.error('Response data:', error.response.data);
+    }
+    throw error;
+  }
 };
 
 const UV_Calendar: React.FC = () => {
@@ -67,7 +105,23 @@ const UV_Calendar: React.FC = () => {
   }
 
   if (error) {
-    return <div>Error loading events</div>;
+    console.error('Calendar error:', error);
+    return (
+      <div className="container mx-auto px-4">
+        <h1 className="text-3xl font-bold mb-4">Calendar</h1>
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+          <strong>Error loading events:</strong> {error.message || 'Unknown error occurred'}
+          <br />
+          <small>Please check your connection and try refreshing the page.</small>
+        </div>
+        <button 
+          onClick={() => window.location.reload()} 
+          className="bg-blue-600 text-white py-2 px-4 rounded"
+        >
+          Retry
+        </button>
+      </div>
+    );
   }
 
   const handleSelectEvent = (event: CalendarEvent) => {

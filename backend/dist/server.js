@@ -635,35 +635,63 @@ app.patch('/api/documents/:document_id', authenticateToken, async (req, res) => 
     }
 });
 // Calendar events endpoints
-app.get('/calendar-events', authenticateToken, async (req, res) => {
+app.get('/api/calendar_events', authenticateToken, async (req, res) => {
     try {
-        const mockEvents = [
-            {
-                event_id: generateUniqueId(),
-                title: 'Team Meeting',
-                start_time: new Date().toISOString(),
-                end_time: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
-                created_by: req.user?.id
+        const user_id = req.user?.id || req.user?.user_id;
+        // Try to get events from database first
+        const result = await pool.query('SELECT * FROM calendar_events ORDER BY start_time ASC');
+        let events = result.rows;
+        // If no events in database, create some sample events
+        if (events.length === 0) {
+            const sampleEvents = [
+                {
+                    event_id: generateUniqueId(),
+                    workspace_id: 'default-workspace',
+                    title: 'Team Meeting',
+                    start_time: new Date().toISOString(),
+                    end_time: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+                    description: 'Weekly team sync meeting'
+                },
+                {
+                    event_id: generateUniqueId(),
+                    workspace_id: 'default-workspace',
+                    title: 'Project Review',
+                    start_time: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+                    end_time: new Date(Date.now() + 25 * 60 * 60 * 1000).toISOString(),
+                    description: 'Review project progress and milestones'
+                }
+            ];
+            // Insert sample events into database
+            for (const event of sampleEvents) {
+                try {
+                    await pool.query('INSERT INTO calendar_events (event_id, workspace_id, title, start_time, end_time, description) VALUES ($1, $2, $3, $4, $5, $6)', [event.event_id, event.workspace_id, event.title, event.start_time, event.end_time, event.description]);
+                }
+                catch (insertError) {
+                    console.log('Sample event already exists or insert failed:', insertError);
+                }
             }
-        ];
-        res.json(mockEvents);
+            events = sampleEvents;
+        }
+        // Return events in the expected format
+        res.json({ events });
     }
     catch (error) {
         console.error('Calendar events fetch error:', error);
         res.status(500).json({ message: 'Internal server error' });
     }
 });
-app.post('/calendar-events', authenticateToken, async (req, res) => {
+app.post('/api/calendar_events', authenticateToken, async (req, res) => {
     try {
-        const { title, start_time, end_time } = req.body;
-        const newEvent = {
-            event_id: generateUniqueId(),
-            title,
-            start_time,
-            end_time,
-            created_by: req.user?.id,
-            created_at: new Date().toISOString()
-        };
+        const { title, start_time, end_time, description } = req.body;
+        const user_id = req.user?.id || req.user?.user_id;
+        if (!title || !start_time || !end_time) {
+            return res.status(400).json({ message: 'Title, start_time, and end_time are required' });
+        }
+        const event_id = generateUniqueId();
+        const workspace_id = 'default-workspace'; // Default workspace for now
+        // Insert into database
+        const result = await pool.query('INSERT INTO calendar_events (event_id, workspace_id, title, start_time, end_time, description) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *', [event_id, workspace_id, title, start_time, end_time, description]);
+        const newEvent = result.rows[0];
         res.status(201).json(newEvent);
     }
     catch (error) {
