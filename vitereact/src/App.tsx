@@ -23,6 +23,7 @@ import UV_DocumentEditor from '@/components/views/UV_DocumentEditor.tsx';
 import UV_Calendar from '@/components/views/UV_Calendar.tsx';
 import UV_UserSettings from '@/components/views/UV_UserSettings.tsx';
 import UV_Login from '@/components/views/UV_Login.tsx';
+import UV_Files from '@/components/views/UV_Files.tsx';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -100,6 +101,7 @@ const App: React.FC = () => {
               <Route path="/tasks" element={<ProtectedRoute><UV_KanbanBoard /></ProtectedRoute>} />
               <Route path="/task/:task_id" element={<ProtectedRoute><UV_TaskDetailView /></ProtectedRoute>} />
               <Route path="/document/:document_id" element={<ProtectedRoute><UV_DocumentEditor /></ProtectedRoute>} />
+              <Route path="/files" element={<ProtectedRoute><UV_Files /></ProtectedRoute>} />
               <Route path="/calendar" element={<ProtectedRoute><UV_Calendar /></ProtectedRoute>} />
               <Route path="/settings" element={<ProtectedRoute><UV_UserSettings /></ProtectedRoute>} />
 

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import axios from 'axios';
 import { useAppStore } from '@/store/main';
-import { CreateWorkspaceInput } from '@schema'; // Assuming @schema is path to the shared schema
+import { CreateWorkspaceInput } from '@/types';
 
 const UV_WorkspaceCreation: React.FC = () => {
   const [workspaceName, setWorkspaceName] = useState('');

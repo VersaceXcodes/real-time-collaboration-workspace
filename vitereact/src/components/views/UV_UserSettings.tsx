@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import { useAppStore } from '@/store/main';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import axios from 'axios';
-import { User, updateUserInputSchema } from '@schema';
-import { z } from 'zod';
+import { User, updateUserInputSchema } from '@/types';
 
 const fetchUserSettings = async (user_id: string, authToken: string): Promise<User> => {
   const { data } = await axios.get(
@@ -56,16 +55,8 @@ const UV_UserSettings: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setFeedback('');
-    try {
-      const validatedData = updateUserInputSchema.parse({ user_id: currentUser!.user_id, name, email });
-      mutation.mutate(validatedData);
-    } catch (err: unknown) {
-      if (err instanceof z.ZodError) {
-        setFeedback('Validation Error: ' + err.errors.map(e => e.message).join(', '));
-      } else {
-        setFeedback('Unexpected error occurred');
-      }
-    }
+    const validatedData = { user_id: currentUser!.user_id, name, email };
+    mutation.mutate(validatedData);
   };
 
   if (isLoading) return <div>Loading settings...</div>;

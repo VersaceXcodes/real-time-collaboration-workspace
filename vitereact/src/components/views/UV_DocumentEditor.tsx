@@ -60,6 +60,19 @@ const UV_DocumentEditor: React.FC = () => {
     }
   }, [documentData]);
 
+  // Auto-save functionality
+  useEffect(() => {
+    if (!documentData || !documentContent || documentContent === documentData.content) {
+      return;
+    }
+
+    const autoSaveTimer = setTimeout(() => {
+      mutation.mutate(documentContent);
+    }, 2000); // Auto-save after 2 seconds of inactivity
+
+    return () => clearTimeout(autoSaveTimer);
+  }, [documentContent, documentData, mutation]);
+
   useEffect(() => {
     // Potentially Setup WebSocket Connection for real-time updates
     // Assuming `socket` is managed globally within the store
@@ -70,28 +83,78 @@ const UV_DocumentEditor: React.FC = () => {
   }, [document_id]);
 
   return (
-    <>
-      <div className="min-h-screen flex flex-col p-4 bg-gray-100">
-        {isLoading && <div>Loading document...</div>}
-        {error && <div className="text-red-600">Error loading document: {error.message}</div>}
-        
-        <textarea
-          className="w-full h-full p-2 border-2 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring" 
-          value={documentContent}
-          onChange={handleContentChange}
-          disabled={isLoading || !!error}
-          aria-label="Document content editor"
-        />
-      
-        <button
-          className="mt-4 p-2 bg-blue-600 text-white rounded hover:bg-blue-700 focus:outline-none"
-          onClick={handleSave}
-          disabled={mutation.isPending}
-        >
-          {mutation.isPending ? 'Saving...' : 'Save'}
-        </button>
+    <div className="min-h-screen bg-gray-50 ml-64 pt-16">
+      <div className="container mx-auto px-6 py-8">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">
+              {documentData?.title || 'Loading...'}
+            </h1>
+            <p className="text-gray-600 text-sm mt-1">
+              Last edited: {documentData?.last_edited_at ? new Date(documentData.last_edited_at).toLocaleString() : 'Never'}
+            </p>
+          </div>
+          
+          <div className="flex items-center space-x-3">
+            <button
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+              onClick={handleSave}
+              disabled={mutation.isPending || isLoading}
+            >
+              {mutation.isPending ? 'Saving...' : 'Save Document'}
+            </button>
+          </div>
+        </div>
+
+        {/* Loading State */}
+        {isLoading && (
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <span className="ml-2 text-gray-600">Loading document...</span>
+          </div>
+        )}
+
+        {/* Error State */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+            <p className="text-red-600">Error loading document: {error.message}</p>
+          </div>
+        )}
+
+        {/* Document Editor */}
+        {!isLoading && !error && (
+          <div className="bg-white rounded-lg shadow-sm border">
+            <div className="p-6">
+              <textarea
+                className="w-full h-96 p-4 border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none font-mono text-sm leading-relaxed" 
+                value={documentContent}
+                onChange={handleContentChange}
+                disabled={isLoading || !!error}
+                aria-label="Document content editor"
+                placeholder="Start writing your document here..."
+              />
+              
+              {/* Status Bar */}
+              <div className="flex justify-between items-center mt-4 pt-4 border-t border-gray-200 text-sm text-gray-500">
+                <div>
+                  {documentContent.length} characters
+                </div>
+                <div className="flex items-center space-x-4">
+                  {mutation.isSuccess && (
+                    <span className="text-green-600">✓ Saved</span>
+                  )}
+                  {mutation.isError && (
+                    <span className="text-red-600">✗ Save failed</span>
+                  )}
+                  <span>Auto-save enabled</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
-    </>
+    </div>
   );
 };
 

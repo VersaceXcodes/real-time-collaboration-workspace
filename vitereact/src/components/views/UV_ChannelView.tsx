@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import axios from 'axios';
 import { useAppStore } from '@/store/main';
-import { Message } from '@schema';
+import { Message } from '@/types';
 
 // Component for displaying and interacting within a channel
 const UV_ChannelView: React.FC = () => {

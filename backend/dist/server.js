@@ -543,7 +543,65 @@ app.patch('/users/:user_id/settings', authenticateToken, async (req, res) => {
     }
 });
 // Documents endpoints
-app.get('/documents/:document_id', authenticateToken, async (req, res) => {
+app.get('/api/documents', authenticateToken, async (req, res) => {
+    try {
+        // For now, return mock documents. In production, this would query the database
+        const mockDocuments = [
+            {
+                document_id: generateUniqueId(),
+                title: 'Project Requirements',
+                content: 'This document outlines the key requirements for our collaboration platform...',
+                last_edited_at: new Date().toISOString(),
+                created_by: req.user?.id || 'system',
+                workspace_id: 'default-workspace'
+            },
+            {
+                document_id: generateUniqueId(),
+                title: 'Meeting Notes - Sprint Planning',
+                content: 'Sprint planning meeting notes from today. Key decisions made...',
+                last_edited_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+                created_by: req.user?.id || 'system',
+                workspace_id: 'default-workspace'
+            },
+            {
+                document_id: generateUniqueId(),
+                title: 'API Documentation',
+                content: 'Complete API documentation for the collaboration platform endpoints...',
+                last_edited_at: new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString(),
+                created_by: req.user?.id || 'system',
+                workspace_id: 'default-workspace'
+            }
+        ];
+        res.json(mockDocuments);
+    }
+    catch (error) {
+        console.error('Documents fetch error:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+app.post('/api/documents', authenticateToken, async (req, res) => {
+    try {
+        const { title, content } = req.body;
+        if (!title) {
+            return res.status(400).json({ message: 'Document title is required' });
+        }
+        const newDocument = {
+            document_id: generateUniqueId(),
+            title,
+            content: content || 'Start writing your document here...',
+            last_edited_at: new Date().toISOString(),
+            created_by: req.user?.id || 'system',
+            workspace_id: 'default-workspace',
+            created_at: new Date().toISOString()
+        };
+        res.status(201).json(newDocument);
+    }
+    catch (error) {
+        console.error('Document creation error:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+app.get('/api/documents/:document_id', authenticateToken, async (req, res) => {
     try {
         const { document_id } = req.params;
         const mockDocument = {
@@ -560,7 +618,7 @@ app.get('/documents/:document_id', authenticateToken, async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 });
-app.patch('/documents/:document_id', authenticateToken, async (req, res) => {
+app.patch('/api/documents/:document_id', authenticateToken, async (req, res) => {
     try {
         const { document_id } = req.params;
         const { content } = req.body;

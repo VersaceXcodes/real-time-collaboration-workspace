@@ -3,21 +3,21 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import axios from 'axios';
 import { Link, useParams } from 'react-router-dom';
 import { useAppStore } from '@/store/main';
-import { taskSchema } from '@schema';
-import { z } from 'zod';
+import { Task } from '@/types';
 
 const UV_TaskDetailView: React.FC = () => {
   const { task_id } = useParams<{ task_id: string }>();
   const authToken = useAppStore(state => state.authentication_state.auth_token);
-  const [taskDetails, setTaskDetails] = useState<z.infer<typeof taskSchema>>({
+  const [taskDetails, setTaskDetails] = useState<Task>({
     task_id: task_id || '',
     board_id: '',
     title: '',
-    description: null,
+    description: '',
     status: '',
     priority: '',
-    due_date: null,
-    assigned_user_id: null,
+    due_date: '',
+    assigned_user_id: '',
+    created_at: '',
   });
 
   const fetchTaskDetails = async () => {
@@ -25,10 +25,10 @@ const UV_TaskDetailView: React.FC = () => {
       `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/api/tasks/${task_id}`,
       { headers: { Authorization: `Bearer ${authToken}` } }
     );
-    return taskSchema.parse(data); // Use Zod parse for type validation
+    return data;
   };
 
-  const updateTaskStatus = async (updatedTask: Partial<z.infer<typeof taskSchema>>) => {
+  const updateTaskStatus = async (updatedTask: Partial<Task>) => {
     await axios.patch(
       `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/api/tasks/${task_id}`,
       updatedTask,
@@ -119,7 +119,7 @@ const UV_TaskDetailView: React.FC = () => {
               <input
                 type="date"
                 className="block w-full p-2 border border-gray-300 rounded mt-1"
-                value={taskDetails.due_date ? taskDetails.due_date.toISOString().substr(0, 10) : ''}
+                value={taskDetails.due_date ? new Date(taskDetails.due_date).toISOString().substr(0, 10) : ''}
                 disabled
               />
             </div>

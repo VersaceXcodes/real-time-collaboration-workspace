@@ -3,7 +3,7 @@ import { useAppStore } from '@/store/main';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Workspace, Channel } from '@schema'; // Importing types from shared schemas
+import { Workspace, Channel } from '@/types';
 
 const GV_SideNav: React.FC = () => {
   const queryClient = useQueryClient();

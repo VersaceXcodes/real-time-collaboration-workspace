@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { useAppStore } from '@/store/main';
-import { Task, CreateTaskInput } from '@schema';
+import { Task, CreateTaskInput } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -27,8 +27,8 @@ const UV_KanbanBoard: React.FC = () => {
     description: '',
     status: 'To Do',
     priority: 'Medium',
-    due_date: null,
-    assigned_user_id: null
+    due_date: '',
+    assigned_user_id: ''
   });
   const queryClient = useQueryClient();
 
@@ -86,8 +86,8 @@ const UV_KanbanBoard: React.FC = () => {
         description: '',
         status: 'To Do',
         priority: 'Medium',
-        due_date: null,
-        assigned_user_id: null
+        due_date: '',
+        assigned_user_id: ''
       });
     },
   });
@@ -175,7 +175,7 @@ const UV_KanbanBoard: React.FC = () => {
     const taskData: CreateTaskInput = {
       board_id: board_id === 'default' ? 'default-board-id' : board_id,
       title: newTask.title,
-      description: newTask.description || null,
+      description: newTask.description || '',
       status: newTask.status || 'To Do',
       priority: newTask.priority || 'Medium',
       due_date: newTask.due_date,
@@ -252,8 +252,8 @@ const UV_KanbanBoard: React.FC = () => {
                   <Input
                     id="due_date"
                     type="date"
-                    value={newTask.due_date ? new Date(newTask.due_date).toISOString().split('T')[0] : ''}
-                    onChange={(e) => setNewTask({ ...newTask, due_date: e.target.value ? new Date(e.target.value) : null })}
+                    value={newTask.due_date || ''}
+                    onChange={(e) => setNewTask({ ...newTask, due_date: e.target.value })}
                   />
                 </div>
               </div>

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAppStore } from '@/store/main';
-import { notificationSchema } from '@schema';
+import { notificationSchema } from '@/types';
 import api from '@/lib/api';
 
 const GV_NotificationPanel: React.FC = () => {
@@ -13,7 +13,7 @@ const GV_NotificationPanel: React.FC = () => {
     queryKey: ['notifications'],
     queryFn: async () => {
       const response = await api.get('/notifications');
-      return notificationSchema.array().parse(response.data);
+      return response.data;
     },
     enabled: !!authToken
   });
