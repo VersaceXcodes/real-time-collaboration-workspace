@@ -35,7 +35,15 @@ export default defineConfig({
 	],
 	server: {
 		host: true,
-		allowedHosts: true,
+		allowedHosts: "all",
+		cors: {
+			origin: true,
+			credentials: true,
+		},
+		headers: {
+			"Cross-Origin-Opener-Policy": "same-origin",
+			"Cross-Origin-Embedder-Policy": "credentialless",
+		},
 	},
 	resolve: {
 		alias: {
@@ -44,6 +52,18 @@ export default defineConfig({
 		},
 	},
 	build: {
-		outDir: "public",
+		outDir: "dist",
+		rollupOptions: {
+			output: {
+				manualChunks: {
+					vendor: ['react', 'react-dom'],
+					ui: ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-tabs'],
+					router: ['react-router-dom'],
+					state: ['zustand', '@tanstack/react-query'],
+					icons: ['lucide-react', 'react-icons'],
+				},
+			},
+		},
+		chunkSizeWarningLimit: 1000,
 	},
 });

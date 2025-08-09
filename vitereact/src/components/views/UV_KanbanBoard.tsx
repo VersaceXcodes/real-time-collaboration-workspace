@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
@@ -32,7 +32,7 @@ const UV_KanbanBoard: React.FC = () => {
   const queryClient = useQueryClient();
 
   // Default columns if no tasks exist
-  const defaultColumns = ['To Do', 'In Progress', 'Review', 'Done'];
+  const defaultColumns = useMemo(() => ['To Do', 'In Progress', 'Review', 'Done'], []);
 
   // Fetch tasks for the board
   const { data: tasks, isLoading, isError } = useQuery({
@@ -117,7 +117,7 @@ const UV_KanbanBoard: React.FC = () => {
       }, {} as { [key: string]: Task[] });
       setColumns(emptyColumns);
     }
-  }, [tasks]);
+  }, [tasks, defaultColumns]);
 
   const onDragEnd = (result: any) => {
     const { destination, source, draggableId } = result;
@@ -221,7 +221,7 @@ const UV_KanbanBoard: React.FC = () => {
                 </div>
                 <div className="grid gap-2">
                   <label htmlFor="status">Status</label>
-                  <Select value={newTask.status} onValueChange={(value) => setNewTask({ ...newTask, status: value })}>
+                  <Select value={newTask.status || 'To Do'} onValueChange={(value) => setNewTask({ ...newTask, status: value })}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select status" />
                     </SelectTrigger>
@@ -234,7 +234,7 @@ const UV_KanbanBoard: React.FC = () => {
                 </div>
                 <div className="grid gap-2">
                   <label htmlFor="priority">Priority</label>
-                  <Select value={newTask.priority} onValueChange={(value) => setNewTask({ ...newTask, priority: value })}>
+                  <Select value={newTask.priority || 'Medium'} onValueChange={(value) => setNewTask({ ...newTask, priority: value })}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select priority" />
                     </SelectTrigger>

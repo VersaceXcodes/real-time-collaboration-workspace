@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, Suspense, lazy } from 'react';
 import {
   BrowserRouter as Router,
   Routes,
@@ -7,23 +7,26 @@ import {
 } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useAppStore } from '@/store/main';
+import LoadingSpinner from '@/components/LoadingSpinner.tsx';
 
-// Import views
+// Import critical views directly
 import GV_TopNav from '@/components/views/GV_TopNav.tsx';
 import GV_SideNav from '@/components/views/GV_SideNav.tsx';
 import GV_Footer from '@/components/views/GV_Footer.tsx';
 import GV_NotificationPanel from '@/components/views/GV_NotificationPanel.tsx';
-import UV_HomeDashboard from '@/components/views/UV_HomeDashboard.tsx';
-import UV_WorkspaceCreation from '@/components/views/UV_WorkspaceCreation.tsx';
-import UV_ChannelView from '@/components/views/UV_ChannelView.tsx';
-import UV_DirectMessage from '@/components/views/UV_DirectMessage.tsx';
-import UV_KanbanBoard from '@/components/views/UV_KanbanBoard.tsx';
-import UV_TaskDetailView from '@/components/views/UV_TaskDetailView.tsx';
-import UV_DocumentEditor from '@/components/views/UV_DocumentEditor.tsx';
-import UV_Calendar from '@/components/views/UV_Calendar.tsx';
-import UV_UserSettings from '@/components/views/UV_UserSettings.tsx';
 import UV_Login from '@/components/views/UV_Login.tsx';
-import UV_Files from '@/components/views/UV_Files.tsx';
+
+// Lazy load non-critical views
+const UV_HomeDashboard = lazy(() => import('@/components/views/UV_HomeDashboard.tsx'));
+const UV_WorkspaceCreation = lazy(() => import('@/components/views/UV_WorkspaceCreation.tsx'));
+const UV_ChannelView = lazy(() => import('@/components/views/UV_ChannelView.tsx'));
+const UV_DirectMessage = lazy(() => import('@/components/views/UV_DirectMessage.tsx'));
+const UV_KanbanBoard = lazy(() => import('@/components/views/UV_KanbanBoard.tsx'));
+const UV_TaskDetailView = lazy(() => import('@/components/views/UV_TaskDetailView.tsx'));
+const UV_DocumentEditor = lazy(() => import('@/components/views/UV_DocumentEditor.tsx'));
+const UV_Calendar = lazy(() => import('@/components/views/UV_Calendar.tsx'));
+const UV_UserSettings = lazy(() => import('@/components/views/UV_UserSettings.tsx'));
+const UV_Files = lazy(() => import('@/components/views/UV_Files.tsx'));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -34,18 +37,14 @@ const queryClient = new QueryClient({
   },
 });
 
-const LoadingSpinner: React.FC = () => (
-  <div className="min-h-screen flex items-center justify-center bg-gray-50">
-    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-  </div>
-);
+
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const isAuthenticated = useAppStore(state => state.authentication_state.authentication_status.is_authenticated);
   const isLoading = useAppStore(state => state.authentication_state.authentication_status.is_loading);
 
   if (isLoading) {
-    return <LoadingSpinner />;
+    return <LoadingSpinner fullScreen text="Authenticating..." />;
   }
 
   if (!isAuthenticated) {
@@ -60,7 +59,7 @@ const LoginRoute: React.FC = () => {
   const isLoading = useAppStore(state => state.authentication_state.authentication_status.is_loading);
 
   if (isLoading) {
-    return <LoadingSpinner />;
+    return <LoadingSpinner fullScreen text="Authenticating..." />;
   }
 
   if (isAuthenticated) {
@@ -80,7 +79,7 @@ const App: React.FC = () => {
   }, [initializeAuth]);
 
   if (isLoading) {
-    return <LoadingSpinner />;
+    return <LoadingSpinner fullScreen text="Authenticating..." />;
   }
 
   return (
@@ -90,23 +89,25 @@ const App: React.FC = () => {
           {isAuthenticated && <GV_TopNav />}
           {isAuthenticated && <GV_SideNav />}
           <main className="flex-1">
-            <Routes>
-              <Route path="/login" element={<LoginRoute />} />
+            <Suspense fallback={<LoadingSpinner text="Loading page..." />}>
+              <Routes>
+                <Route path="/login" element={<LoginRoute />} />
 
-              <Route path="/" element={<ProtectedRoute><UV_HomeDashboard /></ProtectedRoute>} />
-              <Route path="/workspace/create" element={<ProtectedRoute><UV_WorkspaceCreation /></ProtectedRoute>} />
-              <Route path="/channel/:channel_id" element={<ProtectedRoute><UV_ChannelView /></ProtectedRoute>} />
-              <Route path="/direct-message/:user_id" element={<ProtectedRoute><UV_DirectMessage /></ProtectedRoute>} />
-              <Route path="/kanban/:board_id" element={<ProtectedRoute><UV_KanbanBoard /></ProtectedRoute>} />
-              <Route path="/tasks" element={<ProtectedRoute><UV_KanbanBoard /></ProtectedRoute>} />
-              <Route path="/task/:task_id" element={<ProtectedRoute><UV_TaskDetailView /></ProtectedRoute>} />
-              <Route path="/document/:document_id" element={<ProtectedRoute><UV_DocumentEditor /></ProtectedRoute>} />
-              <Route path="/files" element={<ProtectedRoute><UV_Files /></ProtectedRoute>} />
-              <Route path="/calendar" element={<ProtectedRoute><UV_Calendar /></ProtectedRoute>} />
-              <Route path="/settings" element={<ProtectedRoute><UV_UserSettings /></ProtectedRoute>} />
+                <Route path="/" element={<ProtectedRoute><UV_HomeDashboard /></ProtectedRoute>} />
+                <Route path="/workspace/create" element={<ProtectedRoute><UV_WorkspaceCreation /></ProtectedRoute>} />
+                <Route path="/channel/:channel_id" element={<ProtectedRoute><UV_ChannelView /></ProtectedRoute>} />
+                <Route path="/direct-message/:user_id" element={<ProtectedRoute><UV_DirectMessage /></ProtectedRoute>} />
+                <Route path="/kanban/:board_id" element={<ProtectedRoute><UV_KanbanBoard /></ProtectedRoute>} />
+                <Route path="/tasks" element={<ProtectedRoute><UV_KanbanBoard /></ProtectedRoute>} />
+                <Route path="/task/:task_id" element={<ProtectedRoute><UV_TaskDetailView /></ProtectedRoute>} />
+                <Route path="/document/:document_id" element={<ProtectedRoute><UV_DocumentEditor /></ProtectedRoute>} />
+                <Route path="/files" element={<ProtectedRoute><UV_Files /></ProtectedRoute>} />
+                <Route path="/calendar" element={<ProtectedRoute><UV_Calendar /></ProtectedRoute>} />
+                <Route path="/settings" element={<ProtectedRoute><UV_UserSettings /></ProtectedRoute>} />
 
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </Suspense>
           </main>
           {isAuthenticated && <GV_NotificationPanel />}
           {isAuthenticated && <GV_Footer />}

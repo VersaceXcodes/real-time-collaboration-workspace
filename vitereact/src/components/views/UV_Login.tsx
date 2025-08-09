@@ -89,7 +89,8 @@ const UV_Login: React.FC = () => {
             <div className="flex justify-between items-center mb-6">
               <button
                 onClick={toggleLanguage}
-                className="text-blue-600 hover:text-blue-500 text-sm font-medium px-3 py-1 border border-blue-600 rounded-md"
+                className="text-blue-600 hover:text-blue-500 text-sm font-medium px-3 py-1 border border-blue-600 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                aria-label={`Switch to ${language === 'en' ? 'Arabic' : 'English'} language`}
               >
                 {language === 'en' ? 'العربية' : 'English'}
               </button>
@@ -108,7 +109,7 @@ const UV_Login: React.FC = () => {
           
           <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
             {errorMessage && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md" role="alert" aria-live="polite">
                 <p className="text-sm">{errorMessage}</p>
               </div>
             )}
@@ -127,7 +128,7 @@ const UV_Login: React.FC = () => {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder={t.fullName}
-                    className="relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                    className="relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm transition-colors"
                     dir={language === 'ar' ? 'rtl' : 'ltr'}
                   />
                 </div>
@@ -194,7 +195,7 @@ const UV_Login: React.FC = () => {
               <button
                 type="button"
                 onClick={toggleMode}
-                className="text-blue-600 hover:text-blue-500 text-sm font-medium"
+                className="text-blue-600 hover:text-blue-500 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md px-2 py-1"
               >
                 {isRegisterMode 
                   ? t.alreadyHaveAccount
