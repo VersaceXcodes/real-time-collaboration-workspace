@@ -7,7 +7,7 @@ import jwt from 'jsonwebtoken';
 import { Server as WebSocketServer } from 'socket.io';
 import * as http from 'http';
 import { Pool } from 'pg';
-import { createUserInputSchema, searchUserInputSchema } from './schema.js';
+import { createUserInputSchema, searchUserInputSchema, createTaskInputSchema } from './schema.js';
 dotenv.config();
 const { DATABASE_URL, PGHOST, PGDATABASE, PGUSER, PGPASSWORD, PGPORT = 5432, JWT_SECRET = 'your-secret-key' } = process.env;
 const pool = new Pool(DATABASE_URL
@@ -418,29 +418,97 @@ app.patch('/tasks/:task_id', authenticateToken, async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 });
-app.get('/kanban-boards/:board_id/tasks', authenticateToken, async (req, res) => {
+app.get('/kanban_boards/:board_id/tasks', authenticateToken, async (req, res) => {
     try {
         const { board_id } = req.params;
+        // For demo purposes, return sample tasks with proper structure
         const mockTasks = [
             {
                 task_id: generateUniqueId(),
-                title: 'Task 1',
-                status: 'todo',
-                priority: 'high',
-                assigned_user_id: req.user?.id
+                board_id: board_id,
+                title: 'Setup Project Structure',
+                description: 'Initialize the project with proper folder structure and dependencies',
+                status: 'To Do',
+                priority: 'High',
+                assigned_user_id: req.user?.id,
+                due_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
             },
             {
                 task_id: generateUniqueId(),
-                title: 'Task 2',
-                status: 'in_progress',
-                priority: 'medium',
-                assigned_user_id: req.user?.id
+                board_id: board_id,
+                title: 'Design Database Schema',
+                description: 'Create comprehensive database schema for the application',
+                status: 'In Progress',
+                priority: 'High',
+                assigned_user_id: req.user?.id,
+                due_date: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString()
+            },
+            {
+                task_id: generateUniqueId(),
+                board_id: board_id,
+                title: 'Implement Authentication',
+                description: 'Add user authentication and authorization system',
+                status: 'Review',
+                priority: 'Medium',
+                assigned_user_id: req.user?.id,
+                due_date: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString()
+            },
+            {
+                task_id: generateUniqueId(),
+                board_id: board_id,
+                title: 'Write Documentation',
+                description: 'Create comprehensive documentation for the API',
+                status: 'Done',
+                priority: 'Low',
+                assigned_user_id: req.user?.id,
+                due_date: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()
             }
         ];
         res.json(mockTasks);
     }
     catch (error) {
         console.error('Kanban tasks fetch error:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+// Create task endpoint
+app.post('/tasks', authenticateToken, async (req, res) => {
+    try {
+        const taskData = req.body;
+        // Validate input
+        const validatedTask = createTaskInputSchema.parse(taskData);
+        const newTask = {
+            task_id: generateUniqueId(),
+            ...validatedTask,
+            created_at: new Date().toISOString()
+        };
+        res.status(201).json(newTask);
+    }
+    catch (error) {
+        console.error('Task creation error:', error);
+        if (error.name === 'ZodError') {
+            return res.status(400).json({
+                message: 'Invalid task data',
+                details: error.errors.map((e) => `${e.path.join('.')}: ${e.message}`)
+            });
+        }
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+// Get kanban boards endpoint
+app.get('/kanban_boards', authenticateToken, async (req, res) => {
+    try {
+        const mockBoards = [
+            {
+                board_id: 'default',
+                workspace_id: 'default-workspace',
+                name: 'Main Project Board'
+            }
+        ];
+        res.json(mockBoards);
+    }
+    catch (error) {
+        console.error('Kanban boards fetch error:', error);
         res.status(500).json({ message: 'Internal server error' });
     }
 });

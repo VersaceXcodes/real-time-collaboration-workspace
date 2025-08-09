@@ -83,6 +83,20 @@ const GV_SideNav: React.FC = () => {
           <ul className="mt-2 space-y-2">
           </ul>
 
+          <h2 className="mt-6 text-lg font-semibold">Task Management</h2>
+          <ul className="mt-2 space-y-2">
+            <li>
+              <Link to="/kanban/default" className="block px-2 py-1 rounded hover:bg-gray-700">
+                Kanban Board
+              </Link>
+            </li>
+            <li>
+              <Link to="/tasks" className="block px-2 py-1 rounded hover:bg-gray-700">
+                All Tasks
+              </Link>
+            </li>
+          </ul>
+
           <h2 className="mt-6 text-lg font-semibold">Utilities</h2>
           <ul className="mt-2 space-y-2">
             <li>

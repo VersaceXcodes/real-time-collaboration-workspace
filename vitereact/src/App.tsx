@@ -97,6 +97,7 @@ const App: React.FC = () => {
               <Route path="/channel/:channel_id" element={<ProtectedRoute><UV_ChannelView /></ProtectedRoute>} />
               <Route path="/direct-message/:user_id" element={<ProtectedRoute><UV_DirectMessage /></ProtectedRoute>} />
               <Route path="/kanban/:board_id" element={<ProtectedRoute><UV_KanbanBoard /></ProtectedRoute>} />
+              <Route path="/tasks" element={<ProtectedRoute><UV_KanbanBoard /></ProtectedRoute>} />
               <Route path="/task/:task_id" element={<ProtectedRoute><UV_TaskDetailView /></ProtectedRoute>} />
               <Route path="/document/:document_id" element={<ProtectedRoute><UV_DocumentEditor /></ProtectedRoute>} />
               <Route path="/calendar" element={<ProtectedRoute><UV_Calendar /></ProtectedRoute>} />
