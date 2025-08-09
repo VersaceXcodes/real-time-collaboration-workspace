@@ -349,6 +349,26 @@ app.get('/auth/verify', authenticateToken, async (req, res) => {
   }
 });
 
+// Logout endpoint
+app.post('/auth/logout', authenticateToken, async (req, res) => {
+  try {
+    // In a production app, you would typically:
+    // 1. Add the token to a blacklist/revocation list
+    // 2. Store revoked tokens in Redis or database
+    // 3. Check blacklist in authenticateToken middleware
+    
+    // For now, we'll just return success since JWT tokens are stateless
+    // The frontend will clear the token from localStorage
+    res.json({ 
+      message: 'Logged out successfully',
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Logout error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
 // Search users endpoint
 app.get('/users', authenticateToken, async (req, res) => {
   try {

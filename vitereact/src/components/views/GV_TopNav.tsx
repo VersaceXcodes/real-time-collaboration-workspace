@@ -52,21 +52,28 @@ const GV_TopNav: React.FC = () => {
               </span>
             )}
           </button>
-          <div className="relative">
-            <button className="flex items-center space-x-2 focus:outline-none" aria-label="User Menu">
+          <button
+            onClick={logout_user}
+            className="px-3 py-1 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded border border-red-200 hover:border-red-300 transition-colors"
+            aria-label="Logout"
+          >
+            Logout
+          </button>
+          <div className="relative group">
+            <button className="flex items-center space-x-2 focus:outline-none hover:bg-gray-100 px-3 py-2 rounded" aria-label="User Menu">
               <FaUserCircle className="text-gray-500" />
               <span>{current_user?.name}</span>
             </button>
-            <div className="dropdown-content absolute right-0 mt-2 w-48 bg-white border rounded shadow-lg">
+            <div className="dropdown-content absolute right-0 mt-2 w-48 bg-white border rounded shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
               <button
                 onClick={switch_theme}
-                className="block px-4 py-2 text-gray-700 hover:bg-gray-100 w-full text-left"
+                className="block px-4 py-2 text-gray-700 hover:bg-gray-100 w-full text-left border-b border-gray-100"
               >
                 Switch to {theme === 'light' ? 'dark' : 'light'} mode
               </button>
               <button
                 onClick={logout_user}
-                className="block px-4 py-2 text-gray-700 hover:bg-gray-100 w-full text-left"
+                className="block px-4 py-2 text-red-600 hover:bg-red-50 w-full text-left font-medium"
               >
                 Logout
               </button>

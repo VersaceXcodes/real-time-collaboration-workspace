@@ -56,7 +56,8 @@ interface AppState {
   // Action Methods
   login_user: (email: string, password: string) => Promise<void>;
   register_user: (email: string, password: string, name: string) => Promise<void>;
-  logout_user: () => void;
+  logout_user: () => Promise<void>;
+  force_logout: () => void;
   initialize_auth: () => Promise<void>;
   clear_auth_error: () => void;
   update_user_profile: (userData: Partial<User>) => void;
@@ -221,10 +222,33 @@ export const useAppStore = create<AppState>()(
         }
       },
       
-      logout_user: () => {
-        const { socket } = get();
+      logout_user: async () => {
+        const { socket, authentication_state } = get();
+        
+        // Call backend logout endpoint if we have a token
+        if (authentication_state.auth_token) {
+          try {
+            await axios.post(
+              `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/auth/logout`,
+              {},
+              { 
+                headers: { 
+                  'Authorization': `Bearer ${authentication_state.auth_token}`,
+                  'Content-Type': 'application/json' 
+                },
+                timeout: 10000
+              }
+            );
+          } catch (error) {
+            console.warn('Logout API call failed, proceeding with local logout:', error);
+            // Continue with logout even if API call fails
+          }
+        }
+
+        // Disconnect socket
         if (socket) socket.disconnect();
 
+        // Clear local state
         set((_state) => ({
           authentication_state: {
             current_user: null,
@@ -238,10 +262,49 @@ export const useAppStore = create<AppState>()(
           socket: null,
         }));
         
+        // Clear localStorage explicitly
+        localStorage.removeItem('app-storage');
+        
         // Redirect to login page after logout
         if (window.location.pathname !== '/login') {
           window.location.href = '/login';
         }
+      },
+      
+      force_logout: () => {
+        const { socket } = get();
+        
+        // Disconnect socket immediately
+        if (socket) socket.disconnect();
+
+        // Clear all state immediately
+        set((_state) => ({
+          authentication_state: {
+            current_user: null,
+            auth_token: null,
+            authentication_status: {
+              is_authenticated: false,
+              is_loading: false,
+            },
+            error_message: null,
+          },
+          workspace_state: {
+            selected_workspace_id: null,
+            workspaces: [],
+          },
+          channel_state: {
+            selected_channel_id: null,
+            channels: [],
+          },
+          socket: null,
+        }));
+        
+        // Clear localStorage
+        localStorage.removeItem('app-storage');
+        
+        // Force redirect and reload
+        window.location.href = '/login';
+        window.location.reload();
       },
       
       initialize_auth: async () => {

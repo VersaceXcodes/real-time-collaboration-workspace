@@ -59,8 +59,10 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       // Clear auth data and redirect to login
       localStorage.removeItem('app-storage');
+      // Force a page reload to clear all state
       if (window.location.pathname !== '/login') {
         window.location.href = '/login';
+        window.location.reload();
       }
       return Promise.reject(error);
     }
