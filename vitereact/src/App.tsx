@@ -54,6 +54,21 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
   return <>{children}</>;
 };
 
+const LoginRoute: React.FC = () => {
+  const isAuthenticated = useAppStore(state => state.authentication_state.authentication_status.is_authenticated);
+  const isLoading = useAppStore(state => state.authentication_state.authentication_status.is_loading);
+
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
+
+  if (isAuthenticated) {
+    return <Navigate to="/" replace />;
+  }
+
+  return <UV_Login />;
+};
+
 const App: React.FC = () => {
   const isLoading = useAppStore(state => state.authentication_state.authentication_status.is_loading);
   const isAuthenticated = useAppStore(state => state.authentication_state.authentication_status.is_authenticated);
@@ -75,7 +90,7 @@ const App: React.FC = () => {
           {isAuthenticated && <GV_SideNav />}
           <main className="flex-1">
             <Routes>
-              <Route path="/login" element={<UV_Login />} />
+              <Route path="/login" element={<LoginRoute />} />
 
               <Route path="/" element={<ProtectedRoute><UV_HomeDashboard /></ProtectedRoute>} />
               <Route path="/workspace/create" element={<ProtectedRoute><UV_WorkspaceCreation /></ProtectedRoute>} />
