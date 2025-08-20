@@ -34,27 +34,36 @@ jobs:
 
       - name: Configure Docker for GCP
         run: |
-          gcloud auth configure-docker gcr.io
-          echo "🐳 Docker configured for Google Container Registry"
+          gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev
+          echo "🐳 Docker configured for Artifact Registry"
           
       - name: Verify Docker authentication
         run: |
           echo "🔐 Verifying Docker authentication..."
           gcloud auth list
-          echo "🐳 Testing Docker access to GCR..."
+          echo "🐳 Testing Docker access to Artifact Registry..."
           docker pull hello-world
+
+      - name: Create Artifact Registry repository
+        run: |
+          echo "🏗️  Creating Artifact Registry repository..."
+          gcloud artifacts repositories create ${{ env.SERVICE_NAME }} \
+            --repository-format=docker \
+            --location=${{ env.REGION }} \
+            --description="Docker repository for ${{ env.SERVICE_NAME }}" \
+            --quiet || echo "Repository already exists"
 
       - name: Build and push Docker image
         run: |
           echo "🔨 Building Docker image..."
-          echo "📦 Image tag: gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}:${{ github.sha }}"
+          echo "📦 Image tag: ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}/${{ env.SERVICE_NAME }}:${{ github.sha }}"
           echo "🏗️  Project ID: ${{ env.PROJECT_ID }}"
           echo "📝 Service Name: ${{ env.SERVICE_NAME }}"
           
-          docker build -t gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}:${{ github.sha }} .
+          docker build -t ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}/${{ env.SERVICE_NAME }}:${{ github.sha }} .
           
           echo "🚀 Pushing Docker image..."
-          docker push gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}:${{ github.sha }}
+          docker push ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}/${{ env.SERVICE_NAME }}:${{ github.sha }}
 
       - name: Deploy to Cloud Run
         run: |
@@ -64,7 +73,7 @@ jobs:
           echo "🔧 Service: ${{ env.SERVICE_NAME }}"
           
           gcloud run deploy ${{ env.SERVICE_NAME }} \
-            --image gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}:${{ github.sha }} \
+            --image ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}/${{ env.SERVICE_NAME }}:${{ github.sha }} \
             --platform managed \
             --region ${{ env.REGION }} \
             --allow-unauthenticated \
