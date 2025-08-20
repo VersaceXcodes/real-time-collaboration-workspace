@@ -68,7 +68,7 @@ jobs:
       - name: Deploy to Cloud Run
         run: |
           echo "🚀 Deploying to Cloud Run..."
-          echo "📦 Image: gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}:${{ github.sha }}"
+          echo "📦 Image: ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}/${{ env.SERVICE_NAME }}:${{ github.sha }}"
           echo "📍 Region: ${{ env.REGION }}"
           echo "🔧 Service: ${{ env.SERVICE_NAME }}"
           
@@ -82,6 +82,15 @@ jobs:
             --cpu 1 \
             --max-instances 10 \
             --min-instances 0 \
+            --quiet
+
+      - name: Fix IAM Policy
+        run: |
+          echo "🔐 Fixing IAM policy for public access..."
+          gcloud run services add-iam-policy-binding ${{ env.SERVICE_NAME }} \
+            --region=${{ env.REGION }} \
+            --member="allUsers" \
+            --role="roles/run.invoker" \
             --quiet
 
       - name: Get service URL
