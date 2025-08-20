@@ -14,10 +14,10 @@ RUN npm run build
 # Stage 2: Set up the Node.js backend
 FROM node:18
 WORKDIR /app/backend
-# Copy package files and install production dependencies
+# Copy package files and install dependencies
 COPY backend/package.json  ./
-# Install dependencies
-RUN npm install --production
+# Install all dependencies (including tsx for TypeScript execution)
+RUN npm install
 # Copy the backend files
 COPY backend ./
 # Copy the frontend build output to a directory served by the backend
