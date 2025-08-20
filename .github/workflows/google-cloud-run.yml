@@ -22,13 +22,34 @@ jobs:
           service_account_key: ${{ secrets.GCP_CREDENTIALS }}
           project_id: ${{ env.PROJECT_ID }}
 
+      - name: Enable required APIs
+        run: |
+          gcloud services enable run.googleapis.com
+          gcloud services enable cloudbuild.googleapis.com
+          gcloud services enable containerregistry.googleapis.com
+
       - name: Configure Docker for GCP
         run: |
-          gcloud auth configure-docker
+          gcloud auth configure-docker us-central1-docker.pkg.dev
+          gcloud auth configure-docker gcr.io
+          
+      - name: Verify Docker authentication
+        run: |
+          echo "🔐 Verifying Docker authentication..."
+          gcloud auth list
+          echo "🐳 Testing Docker access to GCR..."
+          docker pull hello-world
 
       - name: Build and push Docker image
         run: |
+          echo "🔨 Building Docker image..."
+          echo "📦 Image tag: gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}:${{ github.sha }}"
+          echo "🏗️  Project ID: ${{ env.PROJECT_ID }}"
+          echo "📝 Service Name: ${{ env.SERVICE_NAME }}"
+          
           docker build -t gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}:${{ github.sha }} .
+          
+          echo "🚀 Pushing Docker image..."
           docker push gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}:${{ github.sha }}
 
       - name: Deploy to Cloud Run
