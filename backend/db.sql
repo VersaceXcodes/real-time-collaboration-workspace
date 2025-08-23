@@ -1,4 +1,3 @@
--- Create users table
 CREATE TABLE IF NOT EXISTS users (
     user_id VARCHAR PRIMARY KEY,
     email VARCHAR UNIQUE NOT NULL,
@@ -8,14 +7,7 @@ CREATE TABLE IF NOT EXISTS users (
     role VARCHAR NOT NULL
 );
 
--- Create example users with correct passwords
-INSERT INTO users (user_id, email, name, created_at, password_hash, role) VALUES
-('user1', 'john.doe@example.com', 'John Doe', '2023-10-01T10:00:00Z', 'password123', 'admin'),
-('user2', 'jane.smith@example.com', 'Jane Smith', '2023-10-02T11:00:00Z', 'admin123', 'editor'),
-('user3', 'versacecodes@gmail.com', 'Guest User', '2023-10-03T10:00:00Z', 'Airplanes@99', 'guest'),
-('user4', 'sarah.thompson@email.com', 'Sarah Thompson', '2023-10-04T10:00:00Z', 'guestpass123', 'host'),
-('user5', 'mike.rodriguez@beachhost.com', 'Mike Rodriguez', '2023-10-05T10:00:00Z', 'hostpass456', 'superhost')
-ON CONFLICT (user_id) DO NOTHING;
+-- Users will be inserted with hashed passwords by initdb.js
 
 -- Create workspaces table
 CREATE TABLE IF NOT EXISTS workspaces (
