@@ -44,8 +44,10 @@ async function initDb() {
 
     // Execute each command
     for (let cmd of dbInitCommands) {
-      console.dir({ "backend:db:init:command": cmd });
-      await client.query(cmd);
+      if (cmd.trim()) {
+        console.log(`Executing SQL command: ${cmd.trim().substring(0, 50)}...`);
+        await client.query(cmd);
+      }
     }
 
     // Commit transaction
