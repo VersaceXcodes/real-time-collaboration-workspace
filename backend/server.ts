@@ -199,7 +199,7 @@ const authenticateToken = async (req: Request, res: Response, next: NextFunction
 // Routes
 
 // Register endpoint
-app.post('/auth/register', async (req, res) => {
+app.post('/api/auth/register', async (req, res) => {
   try {
     const { email, password, name, role = 'user' } = req.body;
 
@@ -275,7 +275,7 @@ app.post('/auth/register', async (req, res) => {
 });
 
 // Login endpoint
-app.post('/auth/login', async (req, res) => {
+app.post('/api/auth/login', async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -333,7 +333,7 @@ app.post('/auth/login', async (req, res) => {
 });
 
 // Auth verification endpoint
-app.get('/auth/verify', authenticateToken, async (req, res) => {
+app.get('/api/auth/verify', authenticateToken, async (req, res) => {
   try {
     res.json({
       user: {
@@ -350,7 +350,7 @@ app.get('/auth/verify', authenticateToken, async (req, res) => {
 });
 
 // Logout endpoint
-app.post('/auth/logout', authenticateToken, async (req, res) => {
+app.post('/api/auth/logout', authenticateToken, async (req, res) => {
   try {
     // In a production app, you would typically:
     // 1. Add the token to a blacklist/revocation list
@@ -370,7 +370,7 @@ app.post('/auth/logout', authenticateToken, async (req, res) => {
 });
 
 // Search users endpoint
-app.get('/users', authenticateToken, async (req, res) => {
+app.get('/api/users', authenticateToken, async (req, res) => {
   try {
     const { query, limit = 10, offset = 0, sort_by = 'created_at', sort_order = 'desc' } = req.query;
 
@@ -389,7 +389,7 @@ app.get('/users', authenticateToken, async (req, res) => {
 });
 
 // Workspace activities endpoint
-app.get('/workspaces/:workspace_id/activities', authenticateToken, async (req, res) => {
+app.get('/api/workspaces/:workspace_id/activities', authenticateToken, async (req, res) => {
   try {
     const { workspace_id } = req.params;
     
@@ -408,7 +408,7 @@ app.get('/workspaces/:workspace_id/activities', authenticateToken, async (req, r
 });
 
 // Workspace statistics endpoint
-app.get('/workspaces/:workspace_id/statistics', authenticateToken, async (req, res) => {
+app.get('/api/workspaces/:workspace_id/statistics', authenticateToken, async (req, res) => {
   try {
     const { workspace_id } = req.params;
     
@@ -427,7 +427,7 @@ app.get('/workspaces/:workspace_id/statistics', authenticateToken, async (req, r
 });
 
 // Workspaces endpoint
-app.post('/workspaces', authenticateToken, async (req, res) => {
+app.post('/api/workspaces', authenticateToken, async (req, res) => {
   try {
     const { name, settings } = req.body;
     const workspace_id = generateUniqueId();
@@ -450,7 +450,7 @@ app.post('/workspaces', authenticateToken, async (req, res) => {
 });
 
 // Channels endpoint
-app.get('/channels/:channel_id/messages', authenticateToken, async (req, res) => {
+app.get('/api/channels/:channel_id/messages', authenticateToken, async (req, res) => {
   try {
     const { channel_id } = req.params;
     
@@ -473,7 +473,7 @@ app.get('/channels/:channel_id/messages', authenticateToken, async (req, res) =>
   }
 });
 
-app.post('/channels/:channel_id/messages', authenticateToken, async (req, res) => {
+app.post('/api/channels/:channel_id/messages', authenticateToken, async (req, res) => {
   try {
     const { channel_id } = req.params;
     const { content } = req.body;
@@ -495,7 +495,7 @@ app.post('/channels/:channel_id/messages', authenticateToken, async (req, res) =
 });
 
 // Tasks endpoints
-app.get('/tasks/:task_id', authenticateToken, async (req, res) => {
+app.get('/api/tasks/:task_id', authenticateToken, async (req, res) => {
   try {
     const { task_id } = req.params;
     
@@ -517,7 +517,7 @@ app.get('/tasks/:task_id', authenticateToken, async (req, res) => {
   }
 });
 
-app.patch('/tasks/:task_id', authenticateToken, async (req, res) => {
+app.patch('/api/tasks/:task_id', authenticateToken, async (req, res) => {
   try {
     const { task_id } = req.params;
     const updates = req.body;
@@ -535,7 +535,7 @@ app.patch('/tasks/:task_id', authenticateToken, async (req, res) => {
   }
 });
 
-app.get('/kanban_boards/:board_id/tasks', authenticateToken, async (req, res) => {
+app.get('/api/kanban_boards/:board_id/tasks', authenticateToken, async (req, res) => {
   try {
     const { board_id } = req.params;
     
@@ -591,7 +591,7 @@ app.get('/kanban_boards/:board_id/tasks', authenticateToken, async (req, res) =>
 });
 
 // Create task endpoint
-app.post('/tasks', authenticateToken, async (req, res) => {
+app.post('/api/tasks', authenticateToken, async (req, res) => {
   try {
     const taskData = req.body;
     
@@ -620,7 +620,7 @@ app.post('/tasks', authenticateToken, async (req, res) => {
 });
 
 // Get kanban boards endpoint
-app.get('/kanban_boards', authenticateToken, async (req, res) => {
+app.get('/api/kanban_boards', authenticateToken, async (req, res) => {
   try {
     const mockBoards = [
       {
@@ -638,7 +638,7 @@ app.get('/kanban_boards', authenticateToken, async (req, res) => {
 });
 
 // User settings endpoints
-app.get('/users/:user_id/settings', authenticateToken, async (req, res) => {
+app.get('/api/users/:user_id/settings', authenticateToken, async (req, res) => {
   try {
     const mockSettings = {
       theme: 'light',
@@ -654,7 +654,7 @@ app.get('/users/:user_id/settings', authenticateToken, async (req, res) => {
   }
 });
 
-app.patch('/users/:user_id/settings', authenticateToken, async (req, res) => {
+app.patch('/api/users/:user_id/settings', authenticateToken, async (req, res) => {
   try {
     const updates = req.body;
     
@@ -854,7 +854,7 @@ app.post('/api/calendar_events', authenticateToken, async (req, res) => {
 });
 
 // Direct messages endpoints
-app.get('/direct-messages/:conversation_id/messages', authenticateToken, async (req, res) => {
+app.get('/api/direct-messages/:conversation_id/messages', authenticateToken, async (req, res) => {
   try {
     const { conversation_id } = req.params;
     
@@ -875,7 +875,7 @@ app.get('/direct-messages/:conversation_id/messages', authenticateToken, async (
   }
 });
 
-app.post('/direct-messages/:conversation_id/messages', authenticateToken, async (req, res) => {
+app.post('/api/direct-messages/:conversation_id/messages', authenticateToken, async (req, res) => {
   try {
     const { conversation_id } = req.params;
     const { content } = req.body;
@@ -896,7 +896,7 @@ app.post('/direct-messages/:conversation_id/messages', authenticateToken, async 
 });
 
 // Notifications endpoints
-app.get('/notifications', authenticateToken, async (req, res) => {
+app.get('/api/notifications', authenticateToken, async (req, res) => {
   try {
     const user_id = req.user?.id || req.user?.user_id;
     
@@ -927,7 +927,7 @@ app.get('/notifications', authenticateToken, async (req, res) => {
   }
 });
 
-app.get('/notifications/count', authenticateToken, async (req, res) => {
+app.get('/api/notifications/count', authenticateToken, async (req, res) => {
   try {
     const user_id = req.user?.id || req.user?.user_id;
     
@@ -946,7 +946,7 @@ app.get('/notifications/count', authenticateToken, async (req, res) => {
   }
 });
 
-app.patch('/notifications/:notification_id', authenticateToken, async (req, res) => {
+app.patch('/api/notifications/:notification_id', authenticateToken, async (req, res) => {
   try {
     const { notification_id } = req.params;
     const updates = req.body;
@@ -964,7 +964,7 @@ app.patch('/notifications/:notification_id', authenticateToken, async (req, res)
   }
 });
 
-app.patch('/notifications/:notification_id/read', authenticateToken, async (req, res) => {
+app.patch('/api/notifications/:notification_id/read', authenticateToken, async (req, res) => {
   try {
     const { notification_id } = req.params;
     const user_id = req.user?.id || req.user?.user_id;
@@ -992,7 +992,7 @@ app.patch('/notifications/:notification_id/read', authenticateToken, async (req,
 });
 
 // Channels list endpoint
-app.get('/workspaces/:workspace_id/channels', authenticateToken, async (req, res) => {
+app.get('/api/workspaces/:workspace_id/channels', authenticateToken, async (req, res) => {
   try {
     const { workspace_id } = req.params;
     
@@ -1080,7 +1080,7 @@ function generateUniqueId() {
 }
 
 // Health check endpoint
-app.get("/health", async (req, res) => {
+app.get("/api/health", async (req, res) => {
   try {
     // Test database connection
     await pool.query('SELECT 1');
@@ -1148,10 +1148,7 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   });
 });
 
-// Catch-all route for SPA routing (must be last)
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
+// Note: No catch-all route - let frontend handle its own routing
 
 export { app, pool, server };
 
